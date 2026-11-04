@@ -1,0 +1,1 @@
+{"symbol":"GLD","asset_class":"etf","asset_subclass":"commodity_etf","leverage_factor":null,"confidence":"high","source":"rule","reason":"commodity wording in “SPDR Gold Shares Commodities Focused”","flags":[],"overrides":{},"conventions":{"annualisation":252,"calendar":"exchange","price_field":"adj_close","has_volume":true,"return_kind":"simple","benchmark":"SPY","caveats":[]}}

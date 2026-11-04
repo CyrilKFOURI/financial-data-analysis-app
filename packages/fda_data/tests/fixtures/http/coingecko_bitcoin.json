@@ -1,0 +1,23 @@
+{
+ "id": "bitcoin",
+ "symbol": "btc",
+ "name": "Bitcoin",
+ "categories": [
+  "Smart Contract Platform",
+  "Layer 1 (L1)",
+  "FTX Holdings",
+  "Proof of Work (PoW)",
+  "Bitcoin Ecosystem",
+  "GMCI 30 Index",
+  "GMCI Index",
+  "Coinbase 50 Index"
+ ],
+ "hashing_algorithm": "SHA-256",
+ "genesis_date": "2009-01-03",
+ "market_cap_rank": 1,
+ "market_data": {
+  "circulating_supply": 20102287.0,
+  "total_supply": 20102287.0,
+  "max_supply": 21000000.0
+ }
+}

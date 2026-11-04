@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.odt binary
+*.pdf binary
+*.png binary
+*.svg text eol=lf

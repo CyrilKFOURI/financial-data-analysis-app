@@ -1,0 +1,90 @@
+{
+ "AAPL": {
+  "quoteType": "EQUITY",
+  "longName": "Apple Inc.",
+  "shortName": "Apple Inc.",
+  "currency": "USD",
+  "exchange": "NMS",
+  "fullExchangeName": "NasdaqGS",
+  "sector": "Technology",
+  "industry": "Consumer Electronics",
+  "country": "United States",
+  "exchangeTimezoneName": "America/New_York",
+  "typeDisp": "Equity"
+ },
+ "SPY": {
+  "quoteType": "ETF",
+  "longName": "State Street SPDR S&P 500 ETF Trust",
+  "shortName": "State Street SPDR S&P 500 ETF T",
+  "currency": "USD",
+  "exchange": "PCX",
+  "fullExchangeName": "NYSEArca",
+  "exchangeTimezoneName": "America/New_York",
+  "typeDisp": "ETF",
+  "category": "Large Blend",
+  "fundFamily": "State Street Investment Management",
+  "legalType": "Exchange Traded Fund"
+ },
+ "BTC-USD": {
+  "quoteType": "CRYPTOCURRENCY",
+  "longName": "Bitcoin USD",
+  "shortName": "Bitcoin USD",
+  "currency": "USD",
+  "exchange": "CCC",
+  "fullExchangeName": "CCC",
+  "exchangeTimezoneName": "UTC",
+  "typeDisp": "Cryptocurrency"
+ },
+ "^GSPC": {
+  "quoteType": "INDEX",
+  "longName": "S&P 500",
+  "shortName": "S&P 500",
+  "currency": "USD",
+  "exchange": "SNP",
+  "fullExchangeName": "SNP",
+  "exchangeTimezoneName": "America/New_York",
+  "typeDisp": "Index"
+ },
+ "EURUSD=X": {
+  "quoteType": "CURRENCY",
+  "longName": "EUR/USD",
+  "shortName": "EUR/USD",
+  "currency": "USD",
+  "exchange": "CCY",
+  "fullExchangeName": "CCY",
+  "exchangeTimezoneName": "Europe/London",
+  "typeDisp": "Currency"
+ },
+ "GC=F": {
+  "quoteType": "FUTURE",
+  "shortName": "Gold Dec 26",
+  "currency": "USD",
+  "exchange": "CMX",
+  "fullExchangeName": "COMEX",
+  "exchangeTimezoneName": "America/New_York",
+  "typeDisp": "Futures"
+ },
+ "VFIAX": {
+  "quoteType": "MUTUALFUND",
+  "longName": "Vanguard 500 Index Admiral",
+  "shortName": "Vanguard 500 Index Fd Admiral S",
+  "currency": "USD",
+  "exchange": "NAS",
+  "fullExchangeName": "Nasdaq",
+  "exchangeTimezoneName": "America/New_York",
+  "typeDisp": "Fund"
+ },
+ "MC.PA": {
+  "quoteType": "EQUITY",
+  "longName": "LVMH Moët Hennessy - Louis Vuitton, Société Européenne",
+  "shortName": "LVMH",
+  "currency": "EUR",
+  "exchange": "PAR",
+  "fullExchangeName": "Paris",
+  "sector": "Consumer Cyclical",
+  "industry": "Luxury Goods",
+  "country": "France",
+  "exchangeTimezoneName": "Europe/Paris",
+  "typeDisp": "Equity"
+ }
+}

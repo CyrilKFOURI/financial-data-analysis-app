@@ -1,0 +1,27 @@
+[project]
+name = "fda-api"
+version = "0.1.0"
+description = "FastAPI application serving the analytics engine"
+requires-python = ">=3.12"
+dependencies = [
+    "fda-core",
+    "fda-contracts",
+    "fda-data",
+    "fda-demo",
+    "arq>=0.26",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "redis>=5.2",
+    "anyio>=4.6",
+    "httpx2>=2.16",
+]
+
+[tool.uv.sources]
+fda-core = { workspace = true }
+fda-contracts = { workspace = true }
+fda-data = { workspace = true }
+fda-demo = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,1 @@
+{"symbol":"AMZN","asset_class":"equity","asset_subclass":"common_stock","leverage_factor":null,"confidence":"medium","source":"provider","reason":"provider type EQUITY","flags":[],"overrides":{},"conventions":{"annualisation":252,"calendar":"exchange","price_field":"adj_close","has_volume":true,"return_kind":"simple","benchmark":"SPY","caveats":[]}}

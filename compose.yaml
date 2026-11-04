@@ -1,0 +1,133 @@
+# Deployment profiles (TRD §13, M31 §4, docs/DEPLOYMENT.md).
+#   docker compose up -d                      postgres + redis for native dev (uv run / pnpm dev)
+#   docker compose --profile app up -d        whole app in containers (laptop or home server)
+#   docker compose --profile app --profile gpu up -d   + a GPU worker (NVIDIA Container Toolkit)
+#   cloud: docker compose -f compose.yaml -f compose.cloud.yaml --profile app up -d
+name: fda
+
+x-python: &python
+  image: fda-python:${FDA_VERSION:-local}
+  build:
+    context: .
+    dockerfile: infra/docker/python.Dockerfile
+  env_file:
+    - path: .env
+      required: false
+  environment: &python-env
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fda}:${POSTGRES_PASSWORD:-fda_local_only}@postgres:5432/${POSTGRES_DB:-fda}
+    REDIS_URL: redis://redis:6379/0
+    DATA_DIR: /data
+    FDA_WEB_URL: ${FDA_PUBLIC_URL:-http://127.0.0.1:8080}
+  volumes:
+    # a named volume by default; FDA_DATA_PATH=./data reuses the native-dev lake on the host
+    - ${FDA_DATA_PATH:-fda_data}:/data
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fda_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-fda}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *python
+    profiles: [app]
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    <<: *python
+    profiles: [app]
+    environment:
+      <<: *python-env
+      FDA_SCHEDULER: ${FDA_SCHEDULER_IN_API:-1}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    <<: *python
+    profiles: [app]
+    command: ["arq", "fda_worker.settings.WorkerSettings"]
+    healthcheck:
+      disable: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker-gpu:
+    <<: *python
+    profiles: [gpu]
+    command: ["arq", "fda_worker.settings.WorkerSettings"]
+    healthcheck:
+      disable: true
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  web:
+    image: fda-web:${FDA_VERSION:-local}
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    environment:
+      FDA_SITE: ${FDA_SITE:-:80}
+      FDA_AUTH: ${FDA_AUTH:-off}
+      FDA_BASIC_AUTH_USER: ${FDA_BASIC_AUTH_USER:-fda}
+      FDA_BASIC_AUTH_HASH: ${FDA_BASIC_AUTH_HASH:-}
+    ports:
+      - "${FDA_BIND:-127.0.0.1}:${FDA_HTTP_PORT:-8080}:80"
+      - "${FDA_BIND:-127.0.0.1}:${FDA_HTTPS_PORT:-8443}:443"
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  fda_data:
+  caddy_data:

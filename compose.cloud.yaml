@@ -1,0 +1,66 @@
+# Cloud override (M31 §4): managed Postgres and Redis, stateless API replicas, scaled workers.
+#   docker compose -f compose.yaml -f compose.cloud.yaml --profile app up -d
+# Required in the environment (or a secrets manager that injects it): DATABASE_URL, REDIS_URL.
+# The lake is a shared volume (NFS / EFS mounted at FDA_LAKE_HOST_PATH); S3 needs s3fs (not
+# approved yet). Schedules run in the single `scheduler` service so replicas never double-run.
+x-cloud-env: &cloud-env
+  DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL to the managed Postgres 16}
+  REDIS_URL: ${REDIS_URL:?set REDIS_URL to the managed Redis}
+  DATA_DIR: /data
+  FDA_WEB_URL: ${FDA_PUBLIC_URL:?set FDA_PUBLIC_URL, e.g. https://fda.example.org}
+
+x-cloud-volumes: &cloud-volumes
+  - ${FDA_LAKE_HOST_PATH:?set FDA_LAKE_HOST_PATH to the shared data mount}:/data
+
+services:
+  postgres:
+    profiles: [local-db]
+  redis:
+    profiles: [local-db]
+
+  migrate:
+    environment: *cloud-env
+    volumes: *cloud-volumes
+    depends_on: !reset {}
+
+  api:
+    environment:
+      <<: *cloud-env
+      FDA_SCHEDULER: "0"
+    volumes: *cloud-volumes
+    depends_on: !reset
+      migrate:
+        condition: service_completed_successfully
+    deploy:
+      replicas: ${FDA_API_REPLICAS:-2}
+
+  scheduler:
+    image: fda-python:${FDA_VERSION:-local}
+    profiles: [app]
+    environment:
+      <<: *cloud-env
+      FDA_SCHEDULER: "1"
+    volumes: *cloud-volumes
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  worker:
+    environment: *cloud-env
+    volumes: *cloud-volumes
+    depends_on: !reset
+      migrate:
+        condition: service_completed_successfully
+    deploy:
+      replicas: ${FDA_WORKER_REPLICAS:-2}
+
+  worker-gpu:
+    environment: *cloud-env
+    volumes: *cloud-volumes
+    depends_on: !reset {}
+
+  web:
+    depends_on: !reset
+      api:
+        condition: service_healthy

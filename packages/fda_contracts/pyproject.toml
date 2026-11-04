@@ -1,0 +1,10 @@
+[project]
+name = "fda-contracts"
+version = "0.1.0"
+description = "Shared Pydantic result envelopes and parameter models"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.9"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

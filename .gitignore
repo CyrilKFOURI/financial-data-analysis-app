@@ -1,0 +1,36 @@
+# Secrets
+.env
+.env.*
+!.env.example
+!apps/web/.env.demo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+playwright-report/
+test-results/
+
+# Data & caches (lake, local DBs, model weights)
+data/
+*.parquet
+*.duckdb
+models_cache/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

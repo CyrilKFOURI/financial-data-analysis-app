@@ -1,0 +1,1 @@
+{"symbol":"SPY","asset_class":"etf","asset_subclass":"equity_etf","leverage_factor":null,"confidence":"medium","source":"provider","reason":"provider type ETF, equity by default","flags":[],"overrides":{},"conventions":{"annualisation":252,"calendar":"exchange","price_field":"adj_close","has_volume":true,"return_kind":"simple","benchmark":"SPY","caveats":[]}}

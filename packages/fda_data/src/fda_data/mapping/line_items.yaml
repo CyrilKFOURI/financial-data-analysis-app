@@ -1,0 +1,76 @@
+# Canonical line-item dictionary (BACKEND_SCHEMA §4.2–4.3). Order = display order.
+# kind: flow (period sums) | stock (instant) | per_share | count. sign: presentation sign.
+version: 1
+items:
+  # ── income statement ──
+  - {code: revenue, statement: IS, label: Revenue, kind: flow}
+  - {code: cost_of_revenue, statement: IS, parent: revenue, label: Cost of revenue, kind: flow, sign: -1}
+  - {code: gross_profit, statement: IS, label: Gross profit, kind: flow}
+  - {code: rnd, statement: IS, parent: operating_expenses, label: Research & development, kind: flow, sign: -1}
+  - {code: sga, statement: IS, parent: operating_expenses, label: Selling, general & admin., kind: flow, sign: -1}
+  - {code: other_opex, statement: IS, parent: operating_expenses, label: Other operating expenses, kind: flow, sign: -1}
+  - {code: operating_expenses, statement: IS, label: Operating expenses, kind: flow, sign: -1}
+  - {code: operating_income, statement: IS, label: Operating income (EBIT), kind: flow}
+  - {code: d_and_a, statement: IS, label: Depreciation & amortization, kind: flow}
+  - {code: interest_expense, statement: IS, label: Interest expense, kind: flow, sign: -1}
+  - {code: interest_income, statement: IS, label: Interest income, kind: flow}
+  - {code: other_non_operating, statement: IS, label: Other non-operating, kind: flow}
+  - {code: pretax_income, statement: IS, label: Pre-tax income, kind: flow}
+  - {code: income_tax, statement: IS, label: Income tax, kind: flow, sign: -1}
+  - {code: net_income, statement: IS, label: Net income, kind: flow}
+  - {code: minority_interest_is, statement: IS, label: Minority interest, kind: flow}
+  - {code: net_income_common, statement: IS, label: Net income to common, kind: flow}
+  - {code: eps_basic, statement: IS, label: EPS basic, kind: per_share}
+  - {code: eps_diluted, statement: IS, label: EPS diluted, kind: per_share}
+  - {code: shares_basic_wavg, statement: IS, label: Shares basic (w. avg), kind: count}
+  - {code: shares_diluted_wavg, statement: IS, label: Shares diluted (w. avg), kind: count}
+  - {code: sbc, statement: IS, label: Stock-based compensation, kind: flow}
+  # ── balance sheet ──
+  - {code: cash_and_equivalents, statement: BS, parent: total_current_assets, label: Cash & equivalents, kind: stock}
+  - {code: short_term_investments, statement: BS, parent: total_current_assets, label: Short-term investments, kind: stock}
+  - {code: receivables, statement: BS, parent: total_current_assets, label: Receivables, kind: stock}
+  - {code: inventory, statement: BS, parent: total_current_assets, label: Inventory, kind: stock}
+  - {code: other_current_assets, statement: BS, parent: total_current_assets, label: Other current assets, kind: stock}
+  - {code: total_current_assets, statement: BS, parent: total_assets, label: Total current assets, kind: stock}
+  - {code: ppe_net, statement: BS, parent: total_assets, label: PP&E (net), kind: stock}
+  - {code: goodwill, statement: BS, parent: total_assets, label: Goodwill, kind: stock}
+  - {code: intangibles, statement: BS, parent: total_assets, label: Intangibles, kind: stock}
+  - {code: other_non_current_assets, statement: BS, parent: total_assets, label: Other non-current assets, kind: stock}
+  - {code: total_assets, statement: BS, label: Total assets, kind: stock}
+  - {code: accounts_payable, statement: BS, parent: total_current_liabilities, label: Accounts payable, kind: stock}
+  - {code: short_term_debt, statement: BS, parent: total_current_liabilities, label: Short-term debt, kind: stock}
+  - {code: current_portion_lt_debt, statement: BS, parent: total_current_liabilities, label: Current portion of LT debt, kind: stock}
+  - {code: other_current_liabilities, statement: BS, parent: total_current_liabilities, label: Other current liabilities, kind: stock}
+  - {code: total_current_liabilities, statement: BS, parent: total_liabilities, label: Total current liabilities, kind: stock}
+  - {code: long_term_debt, statement: BS, parent: total_liabilities, label: Long-term debt, kind: stock}
+  - {code: operating_lease_liabilities, statement: BS, parent: total_liabilities, label: Operating lease liabilities, kind: stock}
+  - {code: other_non_current_liabilities, statement: BS, parent: total_liabilities, label: Other non-current liabilities, kind: stock}
+  - {code: total_liabilities, statement: BS, label: Total liabilities, kind: stock}
+  - {code: preferred_equity, statement: BS, parent: total_equity, label: Preferred equity, kind: stock}
+  - {code: common_equity, statement: BS, parent: total_equity, label: Common equity, kind: stock}
+  - {code: retained_earnings, statement: BS, parent: common_equity, label: Retained earnings, kind: stock}
+  - {code: minority_interest_bs, statement: BS, parent: total_equity, label: Minority interest, kind: stock}
+  - {code: total_equity, statement: BS, label: Total equity, kind: stock}
+  - {code: total_liabilities_and_equity, statement: BS, label: Total liabilities & equity, kind: stock}
+  - {code: shares_outstanding, statement: BS, label: Shares outstanding, kind: count}
+  # ── cash flow ──
+  - {code: cfo, statement: CF, label: Cash from operations, kind: flow}
+  - {code: capex, statement: CF, parent: cfi, label: Capital expenditure, kind: flow, sign: -1}
+  - {code: acquisitions, statement: CF, parent: cfi, label: Acquisitions, kind: flow, sign: -1}
+  - {code: cfi, statement: CF, label: Cash from investing, kind: flow}
+  - {code: dividends_paid, statement: CF, parent: cff, label: Dividends paid, kind: flow, sign: -1}
+  - {code: buybacks, statement: CF, parent: cff, label: Share buybacks, kind: flow, sign: -1}
+  - {code: share_issuance, statement: CF, parent: cff, label: Share issuance, kind: flow}
+  - {code: debt_issued, statement: CF, parent: cff, label: Debt issued, kind: flow}
+  - {code: debt_repaid, statement: CF, parent: cff, label: Debt repaid, kind: flow, sign: -1}
+  - {code: cff, statement: CF, label: Cash from financing, kind: flow}
+  - {code: fx_effect, statement: CF, label: FX effect, kind: flow}
+  - {code: net_change_cash, statement: CF, label: Net change in cash, kind: flow}
+  # ── other ──
+  - {code: debt_maturity_y1, statement: OTHER, label: Debt due in year 1, kind: stock}
+  - {code: debt_maturity_y2, statement: OTHER, label: Debt due in year 2, kind: stock}
+  - {code: debt_maturity_y3, statement: OTHER, label: Debt due in year 3, kind: stock}
+  - {code: debt_maturity_y4, statement: OTHER, label: Debt due in year 4, kind: stock}
+  - {code: debt_maturity_y5, statement: OTHER, label: Debt due in year 5, kind: stock}
+  - {code: debt_maturity_after_y5, statement: OTHER, label: Debt due after year 5, kind: stock}
+  - {code: employees, statement: OTHER, label: Employees, kind: count}

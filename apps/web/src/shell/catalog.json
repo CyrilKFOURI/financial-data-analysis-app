@@ -1,0 +1,1878 @@
+{
+  "AT-001": {
+    "id": "AT-001",
+    "name": "Asset-type classification",
+    "definition": "Deterministic classifier → `asset_class` / `asset_subclass` (common stock, preferred, ADR, REIT, ETF equity/bond/commodity/leveraged/inverse, mutual fund, index, crypto coin/token/stablecoin, FX spot, commodity future/continuous, rate/macro series) from provider metadata + rules + user overrides",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "AT-002": {
+    "id": "AT-002",
+    "name": "Applicability matrix",
+    "definition": "For each analysis × asset type: applicable / adapted (different defaults) / not applicable, with reason (no fundamentals for BTC; NAV premium only for ETFs; 365-day annualisation for crypto…)",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "AT-003": {
+    "id": "AT-003",
+    "name": "Type-specific profile",
+    "definition": "Equity: company, sector, shares, listing; ETF: issuer, TER, AUM, index, holdings, replication, distribution policy; crypto: supply, market cap, rank, 24/7 calendar; FX: base/quote, rate differential; commodity: contract, roll rule; index: methodology & constituents count",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "AT-004": {
+    "id": "AT-004",
+    "name": "Type-specific risk notes",
+    "definition": "Automatic caveats (leveraged/inverse ETF decay, stablecoin peg, ADR FX exposure, delisting, low float, illiquidity, short history) shown in Overview",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "AT-005": {
+    "id": "AT-005",
+    "name": "ETF analytics",
+    "definition": "Tracking difference & tracking error vs index, premium/discount to NAV (when NAV available), holdings concentration, sector/country look-through, overlap with other ETFs",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "AT-006": {
+    "id": "AT-006",
+    "name": "Crypto analytics",
+    "definition": "24/7 calendar handling, weekend vs weekday behaviour, correlation to Nasdaq/gold, drawdown from ATH, supply & market-cap context, stablecoin peg deviation",
+    "section": "Asset-type intelligence (J1) — M03, `ASSET_TYPES.md`"
+  },
+  "T-001": {
+    "id": "T-001",
+    "name": "Price chart",
+    "definition": "Candles, OHLC bars, line, area, Heikin-Ashi; volume pane; linear/log",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CDC, CB-03a"
+  },
+  "T-002": {
+    "id": "T-002",
+    "name": "Base-100 performance",
+    "definition": "I_t = 100Π_(s≤ t)(1+r_s) rebased at visible start",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-02g"
+  },
+  "T-003": {
+    "id": "T-003",
+    "name": "Period returns",
+    "definition": "1D, 1W, MTD, 1M, 3M, 6M, YTD, 1Y, 3Y, 5Y, 10Y, since inception; annualised for > 1Y",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-02e"
+  },
+  "T-005": {
+    "id": "T-005",
+    "name": "CAGR",
+    "definition": "(V_T/V_0)^(365.25/ days)-1",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QT, QG-125"
+  },
+  "T-007": {
+    "id": "T-007",
+    "name": "Annualised volatility",
+    "definition": "std(r)√(A)",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L07"
+  },
+  "T-011": {
+    "id": "T-011",
+    "name": "Moving averages",
+    "definition": "SMA, EMA (α=2/(n+1)), WMA, DEMA =2E_1-E_2, TEMA =3E_1-3E_2+E_3, KAMA, HMA; any period",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QT, CDC"
+  },
+  "T-012": {
+    "id": "T-012",
+    "name": "MA crossover & distance",
+    "definition": "Golden/death cross events; % and σ-distance of price to MA",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "SK-citadel"
+  },
+  "T-013": {
+    "id": "T-013",
+    "name": "Volatility bands",
+    "definition": "Bollinger ( SMA± kσ), Keltner ( EMA± k ATR), Donchian; %B, bandwidth",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CDC"
+  },
+  "T-030": {
+    "id": "T-030",
+    "name": "52-week range & distance",
+    "definition": "Position in 52w range, % from high/low, all-time high drawdown",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "EXT"
+  },
+  "T-004": {
+    "id": "T-004",
+    "name": "Means",
+    "definition": "Arithmetic, geometric (Π(1+r))^(1/N)-1, harmonic, median, trimmed mean",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L06"
+  },
+  "T-006": {
+    "id": "T-006",
+    "name": "Volatility drag",
+    "definition": "r̄_( arith)-r̄_( geo)≈1/2σ^2 (annualised)",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QG-117/136"
+  },
+  "T-008": {
+    "id": "T-008",
+    "name": "Dispersion",
+    "definition": "Range, MAD, variance, semi-variance 1/NΣmin(r-r̄,0)^2, semi-deviation, IQR",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L07"
+  },
+  "T-009": {
+    "id": "T-009",
+    "name": "Rolling statistics",
+    "definition": "Rolling mean, vol, skew, kurtosis for 21/63/126/252",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-02f"
+  },
+  "T-010": {
+    "id": "T-010",
+    "name": "OHLC volatility estimators",
+    "definition": "Parkinson, Garman–Klass, Rogers–Satchell, Yang–Zhang vs close-to-close",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-05d"
+  },
+  "T-014": {
+    "id": "T-014",
+    "name": "Return distribution",
+    "definition": "Histogram (D/W/M), Normal & Student-t MLE fits, KDE; log/simple toggle",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L08/L11/L13"
+  },
+  "T-015": {
+    "id": "T-015",
+    "name": "Moments",
+    "definition": "Skewness (bias-corrected), excess kurtosis, standardised moments 5–6",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L08"
+  },
+  "T-016": {
+    "id": "T-016",
+    "name": "Normality tests",
+    "definition": "Jarque–Bera, Shapiro–Wilk (N ≤ 5 000), Anderson–Darling, D'Agostino K²; QQ vs Normal & t",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L08"
+  },
+  "T-017": {
+    "id": "T-017",
+    "name": "Tail frequency",
+    "definition": "Observed vs Normal-expected frequency beyond 2σ/3σ/4σ/5σ (\"fat-tail multiplier\")",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QG-126"
+  },
+  "T-018": {
+    "id": "T-018",
+    "name": "Calendar returns",
+    "definition": "Monthly heatmap year × month, annual bars, best/worst day/week/month/year",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-09b"
+  },
+  "T-019": {
+    "id": "T-019",
+    "name": "Return quantiles",
+    "definition": "Box/violin by horizon D/W/M/Q",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "CB-09b"
+  },
+  "T-020": {
+    "id": "T-020",
+    "name": "Estimate instability",
+    "definition": "Rolling Sharpe with Lo (2002) SE band; bootstrap distribution of Sharpe and mean",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QP-L10, QG-101"
+  },
+  "T-021": {
+    "id": "T-021",
+    "name": "Seasonality",
+    "definition": "Mean/median by month, day-of-week, turn-of-month, pre-holiday; t-stats with BH-FDR flags",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "SK-renaissance, QP-L23"
+  },
+  "T-023": {
+    "id": "T-023",
+    "name": "Up/down statistics",
+    "definition": "% positive periods, avg up vs avg down move, longest up/down streaks, gain/loss ratio",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "QT nb"
+  },
+  "T-024": {
+    "id": "T-024",
+    "name": "Return contribution by period",
+    "definition": "Share of total return earned in top 10 / 20 days (\"missing the best days\")",
+    "section": "Prices, returns & statistics (J1–J2) — M04, M05",
+    "source": "EXT"
+  },
+  "TS-001": {
+    "id": "TS-001",
+    "name": "Stationarity battery",
+    "definition": "ADF (lag by AIC/BIC, with/without trend), KPSS (level/trend), Phillips–Perron, Zivot–Andrews (one endogenous break); on price, log-price, returns; order of integration; rolling ADF",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-002": {
+    "id": "TS-002",
+    "name": "Serial dependence",
+    "definition": "ACF/PACF of returns, |r| and r² (95 % bands), Ljung–Box Q(k), Lo–MacKinlay variance ratio (homo/hetero-robust), runs test, BDS test (non-linear dependence)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-003": {
+    "id": "TS-003",
+    "name": "Volatility clustering & models",
+    "definition": "ARCH-LM; GARCH(1,1), GJR-GARCH, EGARCH with Normal / t / skew-t innovations; persistence α+β, vol-shock half-life ln0.5/ln(α+β), unconditional vol, conditional vol series, vol forecast term structure, news-impact curve, standardised-residual diagnostics",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-004": {
+    "id": "TS-004",
+    "name": "Leverage effect & vol dynamics",
+    "definition": "corr(r_t, σ_(t+k)) for k = 1…20, vol-of-vol, realised-vol regimes, vol mean-reversion half-life",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-005": {
+    "id": "TS-005",
+    "name": "Long memory",
+    "definition": "Hurst (R/S with Anis–Lloyd correction, DFA), GPH log-periodogram d, variance-time plot",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-006": {
+    "id": "TS-006",
+    "name": "Fractional differentiation",
+    "definition": "Fixed-width-window FFD weights w_k=-w_(k-1)(d-k+1)/(k) (τ = 1e-5) for d ∈ [0, 1]; ADF statistic and correlation with the original vs d; minimum d\\* passing ADF at 95 % and memory retained (AFML-5)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-007": {
+    "id": "TS-007",
+    "name": "ARIMA dynamics",
+    "definition": "(S)ARIMA order selection (AIC/BIC grid), coefficients ± SE, residual diagnostics, impulse response; in-sample fit only (forward forecasts = V5)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-008": {
+    "id": "TS-008",
+    "name": "Decomposition & spectrum",
+    "definition": "STL trend/seasonal/residual on price, volume, macro; periodogram & Welch density; dominant cycles; wavelet variance by scale (P1)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-009": {
+    "id": "TS-009",
+    "name": "Mean-reversion / OU fit",
+    "definition": "Discrete OU / AR(1) on a level series: φ, σ, μ, half-life −ln2/ln φ with bootstrap CI and Kendall small-sample bias correction; stationary σ = σ/√(1−φ²); warning when φ̂ → 1 (AFML-13, mean formula corrected for P₀ ≠ 0)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-010": {
+    "id": "TS-010",
+    "name": "Structural breaks — CUSUM family",
+    "definition": "Brown–Durbin–Evans CUSUM on recursive residuals; Chu–Stinchcombe–White CUSUM on levels; Chow at a user date; Bai–Perron multiple breaks in mean & variance; break dates shaded on price",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-011": {
+    "id": "TS-011",
+    "name": "Explosiveness / bubbles",
+    "definition": "Chow-type DF (SDFC), SADF, GSADF (Phillips–Shi–Yu), QADF, CADF, sub/super-martingale tests (SMT); bubble periods with simulated critical values (AFML-17)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-012": {
+    "id": "TS-012",
+    "name": "Regimes",
+    "definition": "Gaussian HMM (2–3 states) on returns/vol; Hamilton Markov-switching mean/variance; smoothed probabilities, transition matrix, expected durations, per-regime statistics, regime shading",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-013": {
+    "id": "TS-013",
+    "name": "Entropy & information",
+    "definition": "Shannon entropy via plug-in, Lempel–Ziv, Kontoyiannis estimators on binary, quantile and sigma encodings; rolling entropy (efficiency proxy); entropy-implied vol; estimator validation on known-entropy sequences (AFML-18)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-014": {
+    "id": "TS-014",
+    "name": "Event-based sampling",
+    "definition": "Symmetric CUSUM filter events, threshold h = k·σ (rolling, no look-ahead); event counts & clustering; vs Bollinger events (AFML-2.5)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-015": {
+    "id": "TS-015",
+    "name": "Alternative bars (intraday)",
+    "definition": "Time vs tick vs volume vs dollar bars (fixed & dynamic threshold, no look-ahead), imbalance & run bars from recent 1-min data; return normality, autocorrelation, bar counts per type (AFML-2)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-016": {
+    "id": "TS-016",
+    "name": "Microstructure features",
+    "definition": "Tick rule, Roll spread, Parkinson & Corwin–Schultz spreads, Kyle λ, Amihud λ, Hasbrouck λ, VPIN (intraday buckets), PIN (P1); levels, rolling, percentiles (AFML-19)",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-017": {
+    "id": "TS-017",
+    "name": "Return concentration & runs",
+    "definition": "HHI concentration of positive returns, negative returns and over time (AFML-14); up/down run lengths vs geometric null",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-018": {
+    "id": "TS-018",
+    "name": "Pair dynamics",
+    "definition": "Engle–Granger & Johansen cointegration, hedge ratio (OLS, TLS, Kalman), spread z-score & half-life (TS-009), correlation vs cointegration contrast (QP-L42); trading the spread = TR-",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-019": {
+    "id": "TS-019",
+    "name": "Kalman filtering",
+    "definition": "Local-level & local-linear-trend (signal/noise ratio), dynamic beta/alpha vs benchmark, smoothed states with bands",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-020": {
+    "id": "TS-020",
+    "name": "Lead–lag & causality",
+    "definition": "Cross-correlation at ±k lags, Granger causality (VAR lag by AIC), transfer entropy (P1) between two series",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-021": {
+    "id": "TS-021",
+    "name": "Distribution dynamics",
+    "definition": "Rolling skew/kurtosis, rolling Hill tail index, time-varying normality p-values",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-022": {
+    "id": "TS-022",
+    "name": "Placebo & null simulation",
+    "definition": "For any TS-/T- statistic: observed value vs distribution under i.i.d. bootstrap, stationary block bootstrap, GBM with matched μ, σ → empirical p-value",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-023": {
+    "id": "TS-023",
+    "name": "Volume & activity",
+    "definition": "Volume trend, volume–volatility correlation, abnormal volume z-score, turnover regimes",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "TS-024": {
+    "id": "TS-024",
+    "name": "Series transformations studio",
+    "definition": "Derived series (A/B ratio, spread, log, diff, frac-diff, z-score, detrended, CPI-deflated, FX-converted) usable by every TS- analysis",
+    "section": "Time-series analysis lab (J3) — M06"
+  },
+  "R-001": {
+    "id": "R-001",
+    "name": "Drawdown series",
+    "definition": "DD_t = V_t/max_(s≤ t)V_s - 1",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "CDC, CB-09c"
+  },
+  "R-002": {
+    "id": "R-002",
+    "name": "Drawdown episodes",
+    "definition": "MDD; top-N table: peak, trough, recovery, depth, length, recovery time",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "CB-09c, AFML-13"
+  },
+  "R-003": {
+    "id": "R-003",
+    "name": "Time under water",
+    "definition": "Longest & current drawdown duration",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "AFML-13"
+  },
+  "R-004": {
+    "id": "R-004",
+    "name": "Ulcer & Pain",
+    "definition": "Ulcer =√(1/NΣ DD^2); Pain =1/NΣ|DD|; Martin ratio = excess CAGR / Ulcer",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QT nb"
+  },
+  "R-005": {
+    "id": "R-005",
+    "name": "Sharpe",
+    "definition": "(mean(r-r_f))/( std(r-r_f))√ A",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "all"
+  },
+  "R-006": {
+    "id": "R-006",
+    "name": "Sortino",
+    "definition": "((r̄- MAR)A)/( DD_( MAR)√ A), downside deviation over all obs",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QT"
+  },
+  "R-007": {
+    "id": "R-007",
+    "name": "Calmar / Sterling / Burke",
+    "definition": "CAGR/|MDD|; Sterling (avg of annual MDDs − 10 %); Burke (√(Σ DD_i^2))",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QT"
+  },
+  "R-008": {
+    "id": "R-008",
+    "name": "Distribution-based ratios",
+    "definition": "Omega(θ), tail ratio |q_(95)|/|q_(05)|, gain-to-pain, recovery factor, common-sense ratio, Rachev ratio",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QT nb"
+  },
+  "R-009": {
+    "id": "R-009",
+    "name": "Probabilistic Sharpe",
+    "definition": "Phi (frac(widehatSR-SR^*)√(T-1)√1-hatγ_3widehatSR+(hatγ_4-1)/(4)widehatSR^2) + Minimum Track Record Length",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "AFML-14"
+  },
+  "R-010": {
+    "id": "R-010",
+    "name": "VaR",
+    "definition": "Historical, Gaussian, Cornish–Fisher, Student-t; α ∈ [90, 99.9]; 1–20 d (√h or overlapping)",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QP-L40"
+  },
+  "R-011": {
+    "id": "R-011",
+    "name": "CVaR / ES",
+    "definition": "Historical -mathbb E[rmid r≤ q], Gaussian σvarphi(z)/(1-α)-μ, CF & t variants",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QP-L40"
+  },
+  "R-012": {
+    "id": "R-012",
+    "name": "VaR backtesting",
+    "definition": "Rolling 250 d VaR vs realised; exceedances; Kupiec POF, Christoffersen independence & conditional coverage; Basel traffic light",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "BR"
+  },
+  "R-013": {
+    "id": "R-013",
+    "name": "CAPM beta & alpha",
+    "definition": "OLS on excess returns; Jensen α; R²; t-stats (Newey–West) ; Blume-adjusted β; Dimson β",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QP-L30/31, BRU"
+  },
+  "R-014": {
+    "id": "R-014",
+    "name": "Rolling beta / alpha / correlation to benchmark",
+    "definition": "63/126/252 d",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "CB-09c"
+  },
+  "R-015": {
+    "id": "R-015",
+    "name": "Benchmark-relative set",
+    "definition": "Tracking error, information ratio, Treynor, M² (Modigliani), up/down capture, batting average, relative drawdown",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "BRU, CB-05b"
+  },
+  "R-016": {
+    "id": "R-016",
+    "name": "Historical stress windows",
+    "definition": "Return & MDD in GFC, Euro crisis 2011, Aug-2015, Volmageddon 2018, Q4-2018, COVID 2020, 2022 rates, SVB Mar-2023, Aug-2024 carry unwind, Apr-2025 tariffs; custom windows",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "CB-09c, QG-133"
+  },
+  "R-017": {
+    "id": "R-017",
+    "name": "Leveraged-product decay",
+    "definition": "Realised vs k× benchmark; decay ≈-frack(k-1) 2σ^2",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "BR, QT"
+  },
+  "R-018": {
+    "id": "R-018",
+    "name": "Downside capture & beta",
+    "definition": "Downside beta (r_m < 0), co-skewness, co-kurtosis with benchmark",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "PAL"
+  },
+  "R-019": {
+    "id": "R-019",
+    "name": "Conditional Drawdown-at-Risk",
+    "definition": "CDaR_α of drawdown distribution; drawdown-at-risk",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "PAL, Riskfolio"
+  },
+  "R-020": {
+    "id": "R-020",
+    "name": "Risk summary card",
+    "definition": "Plain-language risk sheet: vol bucket, worst day/month, MDD, VaR95 1 d in currency per 10 000 invested",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "SK-bridgewater"
+  },
+  "R-021": {
+    "id": "R-021",
+    "name": "Model-based VaR/ES",
+    "definition": "GARCH-filtered historical simulation (FHS), Monte Carlo (bootstrap, Student-t, t-copula for portfolios); compared with R-010 and backtested with R-012",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QP-L44, PAL"
+  },
+  "R-022": {
+    "id": "R-022",
+    "name": "Extreme-value tail risk",
+    "definition": "Peaks-over-threshold GPD with threshold diagnostics (mean-excess plot), Hill tail index, EVT VaR/ES 99–99.9 %, return levels (\"1-in-10-years daily loss\")",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "QG-126, PAL"
+  },
+  "R-023": {
+    "id": "R-023",
+    "name": "Drawdown distribution",
+    "definition": "Distribution of drawdown depths/durations; expected max drawdown for a horizon (Magdon-Ismail approximation) and by bootstrap",
+    "section": "Risk & risk-adjusted performance (J4) — M07",
+    "source": "AFML-14/15"
+  },
+  "F-001": {
+    "id": "F-001",
+    "name": "Income statement",
+    "definition": "Canonical tree; FY/Q/TTM; YoY & QoQ sub-rows; common-size % revenue",
+    "section": "Financial statements (J5) — M08",
+    "source": "QT nb"
+  },
+  "F-002": {
+    "id": "F-002",
+    "name": "Balance sheet",
+    "definition": "Canonical tree; common-size % assets; YoY",
+    "section": "Financial statements (J5) — M08",
+    "source": "QT nb"
+  },
+  "F-003": {
+    "id": "F-003",
+    "name": "Cash-flow statement",
+    "definition": "CFO/CFI/CFF tree; FCF, FCF − SBC derived lines",
+    "section": "Financial statements (J5) — M08",
+    "source": "QT nb"
+  },
+  "F-004": {
+    "id": "F-004",
+    "name": "Income Sankey",
+    "definition": "Revenue → COGS/GP → opex lines/EBIT → interest, tax/NI (+ FCF branch option)",
+    "section": "Financial statements (J5) — M08",
+    "source": "EXT"
+  },
+  "F-005": {
+    "id": "F-005",
+    "name": "Profit waterfall",
+    "definition": "Revenue → … → NI",
+    "section": "Financial statements (J5) — M08",
+    "source": "QT nb"
+  },
+  "F-006": {
+    "id": "F-006",
+    "name": "Balance structure",
+    "definition": "Assets vs L+E stacked columns per year",
+    "section": "Financial statements (J5) — M08",
+    "source": "QT nb"
+  },
+  "F-007": {
+    "id": "F-007",
+    "name": "Debt maturity ladder",
+    "definition": "Principal due Y1…Y5, thereafter (XBRL); vs cash & FCF",
+    "section": "Financial statements (J5) — M08",
+    "source": "BR"
+  },
+  "F-008": {
+    "id": "F-008",
+    "name": "Multi-year fundamentals chart",
+    "definition": "Any line items as bars + margins in aligned pane",
+    "section": "Financial statements (J5) — M08",
+    "source": "Kickoff"
+  },
+  "F-009": {
+    "id": "F-009",
+    "name": "Segment & geography",
+    "definition": "Revenue/operating income by segment and region (XBRL dimensions, US filers), mix shift over time",
+    "section": "Financial statements (J5) — M08",
+    "source": "EXT"
+  },
+  "F-021": {
+    "id": "F-021",
+    "name": "Cash-flow bridge",
+    "definition": "Waterfall from EBITDA → taxes → ΔNWC → capex → FCF → dividends/buybacks/M&A → Δnet debt",
+    "section": "Financial statements (J5) — M08",
+    "source": "EXT"
+  },
+  "F-022": {
+    "id": "F-022",
+    "name": "Statement quality checks",
+    "definition": "Reconciliation status, restatements list, coverage matrix (statements × years × source)",
+    "section": "Financial statements (J5) — M08",
+    "source": "TRD §5.4"
+  },
+  "F-010": {
+    "id": "F-010",
+    "name": "Growth",
+    "definition": "YoY, QoQ, CAGR 3/5/10 y of revenue, GP, EBITDA, EBIT, NI, EPS, FCF, FCF/share, BVPS, DPS; growth stability (std of YoY); share-count CAGR; organic vs reported (if segment data)",
+    "section": "Ratios (J6) — M09",
+    "source": "Kickoff"
+  },
+  "F-011": {
+    "id": "F-011",
+    "name": "Margins",
+    "definition": "Gross, EBITDA, EBIT, pretax, net, FCF, CFO margin; R&D %, SG&A %, SBC % of revenue; incremental margins Δ EBIT / Δ revenue",
+    "section": "Ratios (J6) — M09",
+    "source": "Kickoff"
+  },
+  "F-012": {
+    "id": "F-012",
+    "name": "Returns on capital",
+    "definition": "ROE, ROA, ROIC (DECISIONS D-FU-2 variants), ROCE, CROIC (FCF / invested capital), ROTE; ROIC − WACC spread",
+    "section": "Ratios (J6) — M09",
+    "source": "Kickoff, QT"
+  },
+  "F-013": {
+    "id": "F-013",
+    "name": "DuPont",
+    "definition": "3-step and 5-step decomposition with contribution chart over time",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-014": {
+    "id": "F-014",
+    "name": "Liquidity",
+    "definition": "Current, quick, cash ratio, defensive interval, operating cash-flow ratio",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-015": {
+    "id": "F-015",
+    "name": "Solvency & leverage",
+    "definition": "Total & net debt (with leases), D/E, D/Capital, D/Assets, ND/EBITDA, ND/FCF, interest coverage (EBIT & EBITDA), FCCR, equity multiplier",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-016": {
+    "id": "F-016",
+    "name": "Efficiency",
+    "definition": "Asset & fixed-asset turnover, DSO, DIO, DPO, CCC, working capital % revenue",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-017": {
+    "id": "F-017",
+    "name": "Cash generation & quality",
+    "definition": "CFO, capex, FCF, FCF − SBC, FCF/NI, CFO/NI, capex/revenue, capex/D&A, Sloan accruals",
+    "section": "Ratios (J6) — M09",
+    "source": "QT ch.2, BR"
+  },
+  "F-018": {
+    "id": "F-018",
+    "name": "Capital allocation",
+    "definition": "Dividends, payout (NI, FCF), DPS growth, consecutive years of increase, gross/net buybacks, shareholder yield, net debt issuance, M&A spend, reinvestment rate, sustainable growth g=b· ROE",
+    "section": "Ratios (J6) — M09",
+    "source": "SK-harvard, BR"
+  },
+  "F-019": {
+    "id": "F-019",
+    "name": "Per-share",
+    "definition": "EPS basic/diluted, BVPS, TBVPS, FCF/share, sales/share, DPS, cash/share",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-023": {
+    "id": "F-023",
+    "name": "Operating leverage",
+    "definition": "DOL = %ΔEBIT / %Δrevenue; fixed-cost proxy; DFL; DTL",
+    "section": "Ratios (J6) — M09",
+    "source": "BR"
+  },
+  "F-024": {
+    "id": "F-024",
+    "name": "Productivity",
+    "definition": "Revenue & NI per employee",
+    "section": "Ratios (J6) — M09",
+    "source": "EXT"
+  },
+  "F-025": {
+    "id": "F-025",
+    "name": "Sector-specific KPIs",
+    "definition": "Banks: NIM, cost/income, CET1 (when filed), loan/deposit; Insurers: combined ratio; REITs: FFO, AFFO, payout; Software: Rule of 40, ARR proxy; Retail: inventory turns",
+    "section": "Ratios (J6) — M09",
+    "source": "EXT"
+  },
+  "S-001": {
+    "id": "S-001",
+    "name": "Health scorecard",
+    "definition": "5 pillars (Growth, Profitability, Balance sheet, Cash flow, Valuation*) 0–100; blend 70 % absolute thresholds / 30 % own-history percentile; sector threshold sets; full drill-down. *Valuation pillar uses V-001/V-002 from J7; until then the pillar shows \"available with valuation (J7)\"*",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "Kickoff, DECISIONS D-FU-5"
+  },
+  "S-002": {
+    "id": "S-002",
+    "name": "Piotroski F-score",
+    "definition": "9 binary tests",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "Piotroski 2000"
+  },
+  "S-003": {
+    "id": "S-003",
+    "name": "Altman Z / Z″",
+    "definition": "Auto variant, zones; hidden for financials",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "BR"
+  },
+  "S-004": {
+    "id": "S-004",
+    "name": "Beneish M-score",
+    "definition": "8 variables, threshold −1.78 (and −2.22 conservative)",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "BR"
+  },
+  "S-005": {
+    "id": "S-005",
+    "name": "Screen flags",
+    "definition": "Quality (ROE > 15 %, D/E < 0.5, GM > 40 %), value (EV/FCF < 15), cash quality (FCF/NI > 1.2) — descriptive flags with rule text",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "QT ch.2"
+  },
+  "S-006": {
+    "id": "S-006",
+    "name": "Montier C-score",
+    "definition": "6 binary signals: NI–CFO gap widening, DSO up, DIO up, other current assets/revenue up, depreciation/PP&E down, total assets growth > 10 %",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "EXT"
+  },
+  "S-007": {
+    "id": "S-007",
+    "name": "Earnings-quality dashboard",
+    "definition": "Accruals (balance-sheet & cash-flow), CFO/NI trend, DSO vs revenue growth divergence, inventory vs sales, capitalised costs ratio, one-off items frequency",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "QT ch.2"
+  },
+  "S-008": {
+    "id": "S-008",
+    "name": "Dividend safety score",
+    "definition": "Payout (NI & FCF), FCF coverage, ND/EBITDA, dividend growth streak, earnings volatility → 0–100",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "SK-harvard"
+  },
+  "S-009": {
+    "id": "S-009",
+    "name": "Ohlson O-score",
+    "definition": "9-variable logit bankruptcy probability",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "EXT"
+  },
+  "S-010": {
+    "id": "S-010",
+    "name": "Interest-rate & refinancing exposure",
+    "definition": "Floating-rate debt share (if filed), maturities next 24 m vs cash + FCF",
+    "section": "Scores, health & forensics (J6) — M09, M10",
+    "source": "SK-bridgewater"
+  },
+  "V-001": {
+    "id": "V-001",
+    "name": "Current multiples",
+    "definition": "P/E (TTM, NTM if estimates), EV/EBITDA, EV/EBIT, EV/Sales, P/FCF, EV/FCF, P/B, P/TBV, P/S, PEG, dividend/FCF/earnings yields; EV = mkt cap + debt + leases + pref + minorities − cash & ST inv.; mkt cap = price × current share count (≤ 400 d old), cross-checked vs net income ÷ diluted EPS (±20 %, multi-class issuers; spec 274)",
+    "section": "Valuation (J7) — M11",
+    "source": "Kickoff, QT"
+  },
+  "V-002": {
+    "id": "V-002",
+    "name": "PIT historical multiples",
+    "definition": "Daily multiple series using facts with `filed_at ≤ t`; mean ± 1σ, percentiles 10/50/90 over 5/10 y",
+    "section": "Valuation (J7) — M11",
+    "source": "Kickoff"
+  },
+  "V-010": {
+    "id": "V-010",
+    "name": "WACC builder",
+    "definition": "E/V k_e + D/V k_d(1-τ); CAPM / build-up; bottom-up β (peer unlevered median relevered, Hamada); ERP & country premium editable",
+    "section": "Valuation (J7) — M11",
+    "source": "SK-morgan, BR"
+  },
+  "V-011": {
+    "id": "V-011",
+    "name": "DCF",
+    "definition": "FCFF (default) / FCFE / APV; 1/2/3 stages; mid-year; Gordon & exit-multiple TV; EV→equity bridge; per-share value; implied multiples check; reinvestment via sales-to-capital",
+    "section": "Valuation (J7) — M11",
+    "source": "SK-morgan, BR"
+  },
+  "V-012": {
+    "id": "V-012",
+    "name": "Reverse DCF",
+    "definition": "Solve implied growth (and implied margin) for current price",
+    "section": "Valuation (J7) — M11",
+    "source": "QT ch.2"
+  },
+  "V-013": {
+    "id": "V-013",
+    "name": "Dividend discount",
+    "definition": "Gordon & 2-stage/H-model DDM (payers only)",
+    "section": "Valuation (J7) — M11",
+    "source": "BR"
+  },
+  "V-014": {
+    "id": "V-014",
+    "name": "Residual income",
+    "definition": "V_0 = B_0 + Σ ((ROE_t - k_e)B_(t-1))/((1+k_e)^t) (default model for banks/insurers)",
+    "section": "Valuation (J7) — M11",
+    "source": "BR"
+  },
+  "V-015": {
+    "id": "V-015",
+    "name": "Earnings power value",
+    "definition": "Greenwald EPV = adjusted EBIT(1−τ)/WACC; franchise value = market EV − EPV",
+    "section": "Valuation (J7) — M11",
+    "source": "EXT"
+  },
+  "V-016": {
+    "id": "V-016",
+    "name": "Football field",
+    "definition": "Low–high ranges per method (DCF, peers multiples, own-history multiples, DDM/RI, 52 w range, analyst targets labelled third-party) vs current price",
+    "section": "Valuation (J7) — M11",
+    "source": "EXT"
+  },
+  "V-017": {
+    "id": "V-017",
+    "name": "Sensitivity & scenarios",
+    "definition": "2-D sensitivity (WACC × g, margin × growth); bear/base/bull scenarios; Monte Carlo on assumptions (triangular/normal) → distribution of value per share",
+    "section": "Valuation (J7) — M11",
+    "source": "SK-morgan"
+  },
+  "V-018": {
+    "id": "V-018",
+    "name": "Market-implied expectations",
+    "definition": "Implied ROIC/growth pairs consistent with current EV (iso-value curve)",
+    "section": "Valuation (J7) — M11",
+    "source": "EXT"
+  },
+  "V-019": {
+    "id": "V-019",
+    "name": "Sum-of-the-parts",
+    "definition": "Segment EBITDA × user multiples (segment data from F-009 or manual) − net debt",
+    "section": "Valuation (J7) — M11",
+    "source": "EXT"
+  },
+  "V-020": {
+    "id": "V-020",
+    "name": "Valuation history vs fundamentals",
+    "definition": "Price vs EPS/FCF per share (both base 100) — \"multiple expansion vs earnings growth\" decomposition of return: R = Δ EPS + Δ(P/E) + dividends",
+    "section": "Valuation (J7) — M11",
+    "source": "EXT"
+  },
+  "PE-001": {
+    "id": "PE-001",
+    "name": "Auto peer group",
+    "definition": "Algorithm D-PE-2 (industry, size band, return correlation, margin similarity) → ranked candidates with scores",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "DECISIONS"
+  },
+  "PE-002": {
+    "id": "PE-002",
+    "name": "Manual peer group editing",
+    "definition": "Pin/remove/add; freeze; reset to auto; named groups reusable",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "—"
+  },
+  "PE-003": {
+    "id": "PE-003",
+    "name": "Comps table",
+    "definition": "Any F-/V- metric for subject + peers; median, mean, percentile rank, z-score; calendarised option",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "SK-bain"
+  },
+  "PE-004": {
+    "id": "PE-004",
+    "name": "Relative valuation",
+    "definition": "Implied value from peer median multiples (EV/EBITDA, P/E, EV/Sales, P/FCF); regression P/E vs growth or EV/Sales vs margin across peers",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "Kickoff"
+  },
+  "PE-005": {
+    "id": "PE-005",
+    "name": "Operating benchmarking",
+    "definition": "Growth, margins, ROIC, leverage vs peers: scatter maps (e.g. ROIC vs growth, EV/EBIT vs ROIC)",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "SK-bain"
+  },
+  "PE-006": {
+    "id": "PE-006",
+    "name": "Sector dashboard",
+    "definition": "Aggregated sector fundamentals (median margins, growth, multiples) and sector ETF performance vs market",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "SK-mckinsey"
+  },
+  "PE-007": {
+    "id": "PE-007",
+    "name": "Peer price behaviour",
+    "definition": "Correlation, relative performance, beta to peer basket",
+    "section": "Peers, comps & sector (J8) — M12",
+    "source": "EXT"
+  },
+  "E-001": {
+    "id": "E-001",
+    "name": "Earnings calendar & history",
+    "definition": "Past & next report dates, EPS/revenue actual vs consensus (third-party data, labelled)",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "SK-jpmorgan"
+  },
+  "E-002": {
+    "id": "E-002",
+    "name": "Surprise statistics",
+    "definition": "Surprise %, beat rate, standardised unexpected earnings (SUE)",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "SK-jpmorgan"
+  },
+  "E-003": {
+    "id": "E-003",
+    "name": "Earnings event study",
+    "definition": "Cumulative abnormal return (market model) −5…+20 days around reports; average path; gap statistics",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "SK-renaissance, QT ch.2 (PEAD)"
+  },
+  "E-004": {
+    "id": "E-004",
+    "name": "Estimate trends",
+    "definition": "EPS/revenue estimate revisions (7/30/60/90 d) and dispersion when provider supplies them",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "EXT"
+  },
+  "E-005": {
+    "id": "E-005",
+    "name": "Analyst views (third-party)",
+    "definition": "Consensus rating distribution & targets displayed as data with source/date; never re-labelled as app opinion",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "EXT"
+  },
+  "E-006": {
+    "id": "E-006",
+    "name": "Implied vs realised earnings move",
+    "definition": "Needs DV-010 (J15) — slot reserved, filled in V3",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "QG-43/55"
+  },
+  "O-001": {
+    "id": "O-001",
+    "name": "Holder breakdown",
+    "definition": "Insiders %, institutions %, float %, top holders",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "EXT (yfinance, 13F)"
+  },
+  "O-002": {
+    "id": "O-002",
+    "name": "Institutional changes",
+    "definition": "13F quarterly changes for top holders (US)",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "EXT (SEC 13F)"
+  },
+  "O-003": {
+    "id": "O-003",
+    "name": "Insider activity",
+    "definition": "Form 4 transactions (US): buys/sells, net insider value 3/6/12 m, cluster buying flag; non-US where provider supplies",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "QT ch.2, SEC"
+  },
+  "O-004": {
+    "id": "O-004",
+    "name": "Short interest",
+    "definition": "Shares short, % float, days to cover, trend (provider-dependent, US)",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "SK-renaissance"
+  },
+  "O-005": {
+    "id": "O-005",
+    "name": "Share count & dilution",
+    "definition": "Basic/diluted shares history, buyback execution vs authorisation (if filed), SBC dilution rate",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "F-018"
+  },
+  "O-006": {
+    "id": "O-006",
+    "name": "Liquidity profile",
+    "definition": "ADV (20/60 d, value), turnover, Amihud illiquidity, bid-ask proxy (Corwin–Schultz), days to trade X % ADV",
+    "section": "Earnings & estimates; ownership & liquidity (J8) — M13",
+    "source": "QP-L27, AFML-19"
+  },
+  "TA-001": {
+    "id": "TA-001",
+    "name": "Momentum oscillators",
+    "definition": "RSI, StochRSI, Stochastic %K/%D, Williams %R, CCI, ROC, momentum, Ultimate oscillator",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-002": {
+    "id": "TA-002",
+    "name": "Trend indicators",
+    "definition": "MACD (+ hist), ADX/DMI, Aroon, Parabolic SAR, SuperTrend, Ichimoku, linear-regression channel",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-003": {
+    "id": "TA-003",
+    "name": "Volatility",
+    "definition": "ATR, NATR, Chaikin volatility, historical vol cone (also DV)",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-004": {
+    "id": "TA-004",
+    "name": "Volume",
+    "definition": "OBV, A/D line, Chaikin money flow, MFI, volume oscillator, VWAP (session & anchored), volume profile (price × volume histogram, POC, value area)",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-005": {
+    "id": "TA-005",
+    "name": "Candlestick patterns",
+    "definition": "TA-Lib CDL family (≈ 60) with occurrence markers and historical forward-return statistics (descriptive, BH-FDR)",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-006": {
+    "id": "TA-006",
+    "name": "Chart patterns",
+    "definition": "Heuristic detectors: double top/bottom, H&S, triangles, flags, cup & handle — labelled \"heuristic\"",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-007": {
+    "id": "TA-007",
+    "name": "Levels",
+    "definition": "Support/resistance by swing clustering, pivots (classic/Fibonacci/Camarilla), Fibonacci retracements/extensions on chosen swing",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-008": {
+    "id": "TA-008",
+    "name": "Relative strength",
+    "definition": "RS line vs benchmark & sector ETF, Mansfield RS, RS rank in watchlist",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-009": {
+    "id": "TA-009",
+    "name": "Multi-timeframe",
+    "definition": "Same indicator on D/W/M with alignment table; higher-TF values use previous closed bar only",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-010": {
+    "id": "TA-010",
+    "name": "Intraday bars",
+    "definition": "1 m–1 h bars (provider limits apply: yfinance ≈ 7–60 d history) for VWAP & intraday studies",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-011": {
+    "id": "TA-011",
+    "name": "Technical summary table",
+    "definition": "All indicators' current states in one dense table (value, zone, slope) — no buy/sell aggregation",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "TA-012": {
+    "id": "TA-012",
+    "name": "Z-score & mean distance",
+    "definition": "Price z-score vs MA_n, Hurst-based regime hint (from Q-008 when available)",
+    "section": "Technical analysis (J9) — M14"
+  },
+  "P-001": {
+    "id": "P-001",
+    "name": "Weights mode",
+    "definition": "Target weights, rebalancing assumption (D-PF-2), drift, costs bps",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-002": {
+    "id": "P-002",
+    "name": "Transactions mode",
+    "definition": "Ledger: buy/sell/dividend/deposit/withdraw/fee/split/transfer; multi-currency cash",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-003": {
+    "id": "P-003",
+    "name": "TWR",
+    "definition": "Π_t (V_t - CF_t)/(V_(t-1)) - 1 (daily)",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-004": {
+    "id": "P-004",
+    "name": "MWR / XIRR",
+    "definition": "IRR of dated external flows + terminal value",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-005": {
+    "id": "P-005",
+    "name": "Positions & P&L",
+    "definition": "Qty, avg cost (FIFO/PAMP/LIFO), MV, unrealised/realised P&L, day change, weight, holding period",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-006": {
+    "id": "P-006",
+    "name": "Allocation breakdowns",
+    "definition": "Asset class, sector, industry, country, region, currency, market-cap bucket, style (from SC factor ranks in V3)",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-007": {
+    "id": "P-007",
+    "name": "Concentration",
+    "definition": "Max weight, top-5, HHI, effective N",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-008": {
+    "id": "P-008",
+    "name": "Contribution to return",
+    "definition": "Σ_t w_(i,t-1)r_(i,t), cumulative and by period",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-009": {
+    "id": "P-009",
+    "name": "Risk decomposition",
+    "definition": "Euler: RC_i = w_i(Σ w)_i/σ_p; marginal contribution; risk vs weight share",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-010": {
+    "id": "P-010",
+    "name": "Component VaR/CVaR",
+    "definition": "Historical component ES",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-011": {
+    "id": "P-011",
+    "name": "Diversification ratio",
+    "definition": "Σ w_iσ_i/σ_p",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-012": {
+    "id": "P-012",
+    "name": "Covariance estimator choice",
+    "definition": "Sample / LW / OAS / EWMA",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-013": {
+    "id": "P-013",
+    "name": "Absorption ratio",
+    "definition": "PC1 (and top-k) variance share, rolling",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-014": {
+    "id": "P-014",
+    "name": "What-if weights",
+    "definition": "Draft vs saved deltas everywhere",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-017": {
+    "id": "P-017",
+    "name": "Turnover & costs",
+    "definition": "Turnover under the rebalancing assumption, cost drag",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-018": {
+    "id": "P-018",
+    "name": "Brinson attribution",
+    "definition": "Allocation, selection, interaction effects by sector vs benchmark (Brinson–Fachler), multi-period linking (Carino)",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-019": {
+    "id": "P-019",
+    "name": "Look-through fundamentals",
+    "definition": "Portfolio-level P/E (harmonic), EV/EBITDA, ROIC, margins, growth, ND/EBITDA, dividend yield, health score distribution",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-020": {
+    "id": "P-020",
+    "name": "Currency exposure",
+    "definition": "Exposure by currency (listing & revenue-geography proxy), FX contribution to return",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-021": {
+    "id": "P-021",
+    "name": "Liquidity of portfolio",
+    "definition": "Days to liquidate x % at y % ADV per line and total",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-022": {
+    "id": "P-022",
+    "name": "Historical scenario replay",
+    "definition": "Apply crisis windows (R-016) to current weights",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-023": {
+    "id": "P-023",
+    "name": "Factor-shock scenarios",
+    "definition": "Shocks to SPX, 10y yield, USD, oil, HY spread → Δvalue via betas (multi-factor regression)",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-024": {
+    "id": "P-024",
+    "name": "Income analysis",
+    "definition": "Dividend/interest received history, forward 12 m income from current yields, yield on cost, income by line",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-025": {
+    "id": "P-025",
+    "name": "Active share & tracking",
+    "definition": "Active share vs benchmark ETF holdings; ex-ante tracking error",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "P-026": {
+    "id": "P-026",
+    "name": "Holdings overlap",
+    "definition": "Overlap between portfolios / with ETFs (look-through when holdings available)",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-001": {
+    "id": "C-001",
+    "name": "Correlation matrix",
+    "definition": "Pearson/Spearman/Kendall, D/W/M, clustered + dendrogram",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-002": {
+    "id": "C-002",
+    "name": "Rolling correlation",
+    "definition": "Pair explorer 63/126/252",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-003": {
+    "id": "C-003",
+    "name": "Stress correlation",
+    "definition": "Worst-10 % benchmark days vs all days",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-004": {
+    "id": "C-004",
+    "name": "Risk–return map",
+    "definition": "Vol vs CAGR, bubble = weight, iso-Sharpe",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-005": {
+    "id": "C-005",
+    "name": "Correlation stability",
+    "definition": "Sub-period matrix difference, top changed pairs",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-006": {
+    "id": "C-006",
+    "name": "Most correlated assets",
+    "definition": "Top ± correlated in universe",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "C-007": {
+    "id": "C-007",
+    "name": "Tail dependence",
+    "definition": "Empirical lower-tail co-crash frequency for pairs",
+    "section": "Portfolio analysis (J10) — M15"
+  },
+  "CP-001": {
+    "id": "CP-001",
+    "name": "Comparison set",
+    "definition": "2–8 subjects of any type (asset, portfolio, benchmark, later strategy); KPI matrix with best-per-row; overlays (base-100, drawdown, rolling Sharpe/vol); calendar grid; correlation of subjects; stress windows",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "CP-002": {
+    "id": "CP-002",
+    "name": "Benchmarks",
+    "definition": "Presets (S&P 500, Nasdaq-100, MSCI World/ACWI, STOXX 600, CAC 40, AGG, GLD, BTC, 60/40, 80/20 EUR), blended custom benchmarks with rebalancing, portfolio-as-benchmark",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "CP-003": {
+    "id": "CP-003",
+    "name": "Peer-group of portfolios",
+    "definition": "Rank a portfolio within a set (percentile of CAGR/Sharpe/MDD)",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "CP-004": {
+    "id": "CP-004",
+    "name": "Report builder",
+    "definition": "Templates: Company tear sheet, Security risk sheet, Portfolio review, Comparison; HTML/PDF export with sources & formula appendix",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "CP-005": {
+    "id": "CP-005",
+    "name": "Analysis alerts",
+    "definition": "Threshold rules on any analysis output (e.g. ND/EBITDA > 3, drawdown > 15 %, correlation spike) → notification centre",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "CP-006": {
+    "id": "CP-006",
+    "name": "Snapshot history",
+    "definition": "Saved snapshots of portfolio/company metrics to compare over time",
+    "section": "Comparison, benchmarking & reports (J11) — M16, M17"
+  },
+  "Q-001": {
+    "id": "Q-001",
+    "name": "Regression lab",
+    "definition": "OLS/WLS/robust (Huber), multiple regression, diagnostics (BP, White, DW, Ljung–Box, JB, VIF), Newey–West, Box–Cox",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "Q-009": {
+    "id": "Q-009",
+    "name": "PCA",
+    "definition": "Eigen-decomposition, scree, loadings, eigen-portfolios, rolling absorption",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "Q-010": {
+    "id": "Q-010",
+    "name": "Factor exposures",
+    "definition": "CAPM, Fama–French 3 & 5, Carhart momentum, q-factors optional; rolling exposures; factor attribution of return; R² & alpha significance",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "Q-011": {
+    "id": "Q-011",
+    "name": "Macro factor sensitivity",
+    "definition": "Regression on rates, USD, oil, credit spreads, inflation surprises (FRED)",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "Q-015": {
+    "id": "Q-015",
+    "name": "Copulas",
+    "definition": "Gaussian/t/Clayton fits for pairs, tail dependence coefficients",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "Q-016": {
+    "id": "Q-016",
+    "name": "Event studies (generic)",
+    "definition": "Market-model CAR around user-defined events (FOMC, CPI, custom dates)",
+    "section": "Factor & cross-sectional quantitative analysis (J12) — M18"
+  },
+  "MK-001": {
+    "id": "MK-001",
+    "name": "Markets overview",
+    "definition": "Major indices, sector ETFs, rates, FX, commodities, crypto: last, 1D/1W/1M/YTD, 52 w position; heatmap",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-002": {
+    "id": "MK-002",
+    "name": "Sector rotation",
+    "definition": "Sector relative performance & RS ranks over multiple horizons; RRG-style (relative rotation graph)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-003": {
+    "id": "MK-003",
+    "name": "Volatility complex",
+    "definition": "VIX, VIX9D/3M/6M term structure & contango ratio, VVIX, realised vs implied S&P vol, MOVE when available",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-004": {
+    "id": "MK-004",
+    "name": "Yield curves",
+    "definition": "US Treasury curve 1M–30Y (FRED), Euro area curve (ECB), animated history, curve shapes, PCA level/slope/curvature",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-005": {
+    "id": "MK-005",
+    "name": "Spreads",
+    "definition": "10y–2y, 10y–3m with recession shading (USREC), real yields (DFII10), breakevens, term premium (ACM if available)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-006": {
+    "id": "MK-006",
+    "name": "Credit",
+    "definition": "HY & IG OAS, BBB spread, financial conditions (NFCI)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-007": {
+    "id": "MK-007",
+    "name": "Macro dashboard",
+    "definition": "CPI/PCE (headline/core, YoY & 3m annualised), unemployment, payrolls, GDP growth, retail sales, industrial production, Fed funds/€STR, ECB deposit rate, M2",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-008": {
+    "id": "MK-008",
+    "name": "FX",
+    "definition": "Major & EUR crosses matrix, DXY, performance, volatility, carry (rate differentials), correlation with risk assets",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-009": {
+    "id": "MK-009",
+    "name": "Commodities",
+    "definition": "Energy, metals, agriculture front-month continuous series, gold/oil ratios, term structure where contract data exist (best effort)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-010": {
+    "id": "MK-010",
+    "name": "Crypto market",
+    "definition": "Total market cap, BTC/ETH dominance, top-20 performance & vol, BTC correlation to Nasdaq/gold, realised vol comparison",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-011": {
+    "id": "MK-011",
+    "name": "Cross-asset correlation regime",
+    "definition": "Rolling stock–bond correlation, equity–USD, equity–oil; regime shading",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-012": {
+    "id": "MK-012",
+    "name": "Breadth",
+    "definition": "% above 50/200-DMA, advance/decline line, new highs/lows, McClellan — for a universe (needs SC universes, J14 dependency; shown once J14 ships)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-013": {
+    "id": "MK-013",
+    "name": "Macro calendar & release history",
+    "definition": "Scheduled releases list (FRED release dates), last value vs prior",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "MK-014": {
+    "id": "MK-014",
+    "name": "Asset-class returns table",
+    "definition": "Annual returns \"quilt\" of asset classes (the periodic table of returns)",
+    "section": "Markets, macro & cross-asset (J13) — M19"
+  },
+  "SC-001": {
+    "id": "SC-001",
+    "name": "Universes",
+    "definition": "S&P 500, Nasdaq-100, Dow 30, STOXX Europe 600 & CAC 40 (via ETF holdings), crypto top-50, custom (CSV/paste/watchlists)",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-002": {
+    "id": "SC-002",
+    "name": "Metric snapshots",
+    "definition": "Nightly precomputation of ~150 catalog metrics per universe member (columnar snapshot table)",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-003": {
+    "id": "SC-003",
+    "name": "Screen builder",
+    "definition": "AND/OR filter tree on any snapshot metric, absolute or percentile or sector-relative conditions, sort, columns chooser",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-004": {
+    "id": "SC-004",
+    "name": "Factor ranks",
+    "definition": "Value, quality, momentum (12-1), low-vol, growth, size, yield, revisions → percentile & z-score, sector-neutral option, composite (user weights)",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-005": {
+    "id": "SC-005",
+    "name": "Universe heatmap",
+    "definition": "Treemap sized by market cap, coloured by any metric (return, valuation percentile, score)",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-006": {
+    "id": "SC-006",
+    "name": "Metric distributions",
+    "definition": "Histogram/box of a metric across the universe and by sector; the subject's position marked",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-007": {
+    "id": "SC-007",
+    "name": "Saved screens & diffs",
+    "definition": "Save, rerun, \"new entrants/leavers since last run\"",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "SC-008": {
+    "id": "SC-008",
+    "name": "Preset screens (descriptive)",
+    "definition": "Quality compounders, net-cash value, dividend aristocrats-like, high-accruals warning list, deep drawdown list — presets are filters, not recommendations",
+    "section": "Screener & universe analytics (J14) — M20"
+  },
+  "DV-001": {
+    "id": "DV-001",
+    "name": "Option chain",
+    "definition": "Calls/puts by expiry: bid/ask/last/IV/Δ/Γ/ν/Θ/OI/volume, moneyness filters",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-002": {
+    "id": "DV-002",
+    "name": "Pricing & Greeks calculator",
+    "definition": "Black–Scholes–Merton (dividend yield), Black-76, CRR binomial (American); Δ Γ ν Θ ρ + vanna, volga, charm; IV solver (Brent)",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-003": {
+    "id": "DV-003",
+    "name": "Smile & skew",
+    "definition": "IV vs strike/Δ per expiry; 25Δ risk reversal, 25Δ butterfly, skew slope",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-004": {
+    "id": "DV-004",
+    "name": "Term structure",
+    "definition": "ATM IV by expiry; event bumps",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-005": {
+    "id": "DV-005",
+    "name": "IV surface",
+    "definition": "3D surface (moneyness × T), SVI smoothing, arbitrage checks (calendar, butterfly)",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-006": {
+    "id": "DV-006",
+    "name": "IV rank & percentile",
+    "definition": "52 w IV rank/percentile, IV vs HV spread",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-007": {
+    "id": "DV-007",
+    "name": "Volatility cone",
+    "definition": "Realised vol percentiles by horizon vs current IV term structure",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-008": {
+    "id": "DV-008",
+    "name": "Volatility risk premium",
+    "definition": "IV − subsequent realised vol history",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-009": {
+    "id": "DV-009",
+    "name": "Positioning",
+    "definition": "OI and volume by strike, put/call ratios (volume & OI), max-pain (descriptive), unusual activity (volume/OI threshold)",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-010": {
+    "id": "DV-010",
+    "name": "Expected move",
+    "definition": "From ATM straddle; earnings implied move vs historical realised move (fills E-006)",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-011": {
+    "id": "DV-011",
+    "name": "Risk-neutral density",
+    "definition": "Breeden–Litzenberger from smoothed smile",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "DV-012": {
+    "id": "DV-012",
+    "name": "Model calibration",
+    "definition": "Heston calibration to surface (analysis), fit errors",
+    "section": "Derivatives analytics (J15) — M21"
+  },
+  "IN-001": {
+    "id": "IN-001",
+    "name": "Investor profile",
+    "definition": "Questionnaire (horizon, income stability, loss tolerance, liquidity needs, knowledge) → risk score 1–7 & max-drawdown tolerance",
+    "section": "V4 — Investment (decide)",
+    "source": "SK-blackrock"
+  },
+  "IN-002": {
+    "id": "IN-002",
+    "name": "Capital-market assumptions",
+    "definition": "Expected return/vol/correlation per asset class: historical, building-block (yield + growth + valuation change), user overrides",
+    "section": "V4 — Investment (decide)",
+    "source": "BRU, PAL"
+  },
+  "IN-003": {
+    "id": "IN-003",
+    "name": "Strategic allocation",
+    "definition": "Model allocations per risk score (core/satellite), glide path by age/horizon, ETF implementation lists",
+    "section": "V4 — Investment (decide)",
+    "source": "SK-blackrock"
+  },
+  "IN-004": {
+    "id": "IN-004",
+    "name": "IPS generator",
+    "definition": "One-page investment policy statement (objectives, constraints, allocation, rebalancing, benchmark, review)",
+    "section": "V4 — Investment (decide)",
+    "source": "SK-blackrock"
+  },
+  "IN-010": {
+    "id": "IN-010",
+    "name": "Heuristic portfolios",
+    "definition": "1/N, inverse-vol, market-cap, 60/40",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-011": {
+    "id": "IN-011",
+    "name": "Mean–variance family",
+    "definition": "GMV, max-Sharpe, target return/vol, efficient frontier, constraints (bounds, groups, turnover, cardinality)",
+    "section": "V4 — Investment (decide)",
+    "source": "BRU, PAL, QP-L35"
+  },
+  "IN-012": {
+    "id": "IN-012",
+    "name": "Estimators",
+    "definition": "Shrunk means, LW/OAS/denoised covariance, Black–Litterman with views (incl. from valuation/peers analysis)",
+    "section": "V4 — Investment (decide)",
+    "source": "QG-100"
+  },
+  "IN-013": {
+    "id": "IN-013",
+    "name": "Risk parity & budgeting",
+    "definition": "ERC, custom risk budgets",
+    "section": "V4 — Investment (decide)",
+    "source": "BR"
+  },
+  "IN-014": {
+    "id": "IN-014",
+    "name": "Hierarchical",
+    "definition": "HRP, HERC, NCO with dendrogram",
+    "section": "V4 — Investment (decide)",
+    "source": "AFML-16"
+  },
+  "IN-015": {
+    "id": "IN-015",
+    "name": "Tail & drawdown optimisers",
+    "definition": "Min-CVaR, min-CDaR, max-drawdown constraint, max diversification ratio",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-016": {
+    "id": "IN-016",
+    "name": "Robust & resampled",
+    "definition": "Resampled frontier, robust MV",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-017": {
+    "id": "IN-017",
+    "name": "Index tracking",
+    "definition": "Sparse tracking of a benchmark with N names",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-018": {
+    "id": "IN-018",
+    "name": "Allocator validation",
+    "definition": "Walk-forward (rolling re-estimation) comparison of all allocators vs 1/N with costs; turnover; DSR of allocator choice",
+    "section": "V4 — Investment (decide)",
+    "source": "QG-20, PAL"
+  },
+  "IN-020": {
+    "id": "IN-020",
+    "name": "DCA planner",
+    "definition": "Standard DCA vs lump sum; value averaging; VIX-scaled DCA (0.5×/1×/1.5×/2×); trend-filtered (200-DMA pause/double); hybrid — historical simulation & Monte Carlo",
+    "section": "V4 — Investment (decide)",
+    "source": "QT ch.4"
+  },
+  "IN-021": {
+    "id": "IN-021",
+    "name": "Rebalancing policy designer",
+    "definition": "Calendar vs threshold vs hybrid bands; cost/tracking trade-off frontier",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-022": {
+    "id": "IN-022",
+    "name": "Hedging designer",
+    "definition": "Beta hedge (index futures/ETF), currency hedge ratio, tail hedge (put spread cost vs protection, uses DV-002), correlation-based hedge candidates",
+    "section": "V4 — Investment (decide)",
+    "source": "QP-L31/L39, SK-bridgewater, QG-138"
+  },
+  "IN-023": {
+    "id": "IN-023",
+    "name": "Risk budgeting plan",
+    "definition": "Volatility/CVaR budgets per sleeve, sizing to target vol",
+    "section": "V4 — Investment (decide)",
+    "source": "PAL"
+  },
+  "IN-024": {
+    "id": "IN-024",
+    "name": "Goal projection",
+    "definition": "Monte Carlo of contributions/withdrawals → probability of reaching goals, sequence risk",
+    "section": "V4 — Investment (decide)",
+    "source": "QT ch.4"
+  },
+  "IN-025": {
+    "id": "IN-025",
+    "name": "Kelly sizing",
+    "definition": "Full/fractional Kelly for given edge estimates (with estimation-error warning)",
+    "section": "V4 — Investment (decide)",
+    "source": "QG-36"
+  },
+  "TR-001": {
+    "id": "TR-001",
+    "name": "Vectorised backtests",
+    "definition": "Signals → positions; fees, slippage; 1-bar signal shift; warm-up exclusion",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT TEMA nb, CB-06"
+  },
+  "TR-002": {
+    "id": "TR-002",
+    "name": "Parameter grids & sensitivity",
+    "definition": "Grid/random search, heatmaps, ± neighbourhood stability",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT TEMA nb"
+  },
+  "TR-003": {
+    "id": "TR-003",
+    "name": "Validation protocols",
+    "definition": "IS/OOS split, walk-forward, purged K-fold, CPCV",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-7/12, CB-06b"
+  },
+  "TR-004": {
+    "id": "TR-004",
+    "name": "Event-driven engine",
+    "definition": "Orders, partial fills, ADV cap, borrow costs, corporate actions, multi-asset",
+    "section": "V5 — Trading (decide & act)",
+    "source": "CB-07"
+  },
+  "TR-005": {
+    "id": "TR-005",
+    "name": "Trade analytics",
+    "definition": "30 metrics of the TEMA notebook: win rate, expectancy, profit factor, payoff, SQN, streaks, durations, MAE/MFE",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT nb"
+  },
+  "TR-006": {
+    "id": "TR-006",
+    "name": "Tear sheets",
+    "definition": "Returns, rolling, drawdowns, exposures, leverage, turnover, holdings, round trips",
+    "section": "V5 — Trading (decide & act)",
+    "source": "CB-09, QP-L33"
+  },
+  "TR-007": {
+    "id": "TR-007",
+    "name": "Overfitting control",
+    "definition": "Deflated Sharpe, PBO (CSCV), trial counting, haircut Sharpe",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-11/14"
+  },
+  "TR-008": {
+    "id": "TR-008",
+    "name": "The 7 sins checklist",
+    "definition": "Automatic checks before results are shown: survivorship (delisted members included?), look-ahead (signal shift, PIT fundamentals, publication lags), storytelling (pre-registered hypothesis note), data snooping (trial counter), transaction costs, outliers dependence (results without top-k trades), shorting constraints (borrow)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-11, PAL"
+  },
+  "TR-009": {
+    "id": "TR-009",
+    "name": "CSCV & PBO",
+    "definition": "Combinatorially symmetric CV over S sub-matrices of the trials' P&L → logit distribution, probability of backtest overfitting, performance degradation & probability of loss OOS",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-11"
+  },
+  "TR-014": {
+    "id": "TR-014",
+    "name": "CPCV backtest paths",
+    "definition": "N groups, k test groups → binomNk splits, varphi[N,k]=(k)/(N)binomNk paths, purge & embargo around each tested group; Sharpe distribution; variance of mean varphi^(-1)σ^2(1+(varphi-1)barρ); walk-forward vs walk-backward consistency check",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-12"
+  },
+  "TR-015": {
+    "id": "TR-015",
+    "name": "Synthetic-data backtests",
+    "definition": "Fit discrete OU (TS-009) → simulate paths → optimal trading rule heat maps (profit-taking × stop-loss) on the (forecast/σ, half-life) grid, precomputed map table; parameter-uncertainty bands",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-13"
+  },
+  "TR-016": {
+    "id": "TR-016",
+    "name": "Full backtest statistics",
+    "definition": "General characteristics (time range, avg AUM, capacity, leverage, max position, long ratio, bet frequency, avg holding period, annualised turnover, correlation to underlying); performance (PnL, long/short PnL, annualised return, hit ratio, avg return hits/misses, TWRR); runs (HHI of returns, drawdowns, time under water); implementation shortfall (fees/turnover, slippage/turnover, performance/turnover, return on execution costs); efficiency (Sharpe, IR, PSR, DSR); classification scores (accuracy, precision vs base rate, recall, F1, log-loss, calibration); attribution",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-14"
+  },
+  "TR-017": {
+    "id": "TR-017",
+    "name": "Strategy risk",
+    "definition": "Sharpe of binary strategies from precision p, payoff π±, frequency n; implied precision and implied betting frequency for a target Sharpe; probability of strategy failure P[p < p_θ] by bootstrap (AFML-15, variance/std bug corrected)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-15"
+  },
+  "TR-018": {
+    "id": "TR-018",
+    "name": "Carver forecast engine",
+    "definition": "Rules with published scalars, each scaled to mean |F| ≈ 10 and capped ±20: EWMAC (8/32, 16/64, 32/128, 64/256; ÷ σ in price units), breakout (40/80/160/320-day range position, smoothed), acceleration (EWMAC change over its fast span), skew (−rolling skew 60/120/240). Within-rule FDMs 1.13/1.17/1.55/1.18; rule weights 0.15/0.15/0.15/0.20 normalised to 1; combined FDM = 1/√(w′Cw) on floored correlations, cap 2.5, point-in-time (expanding, monthly); vol = 0.7·EWMA σ(30) + 0.3·its 5-y mean; weight = F/10 · τ/σ, long-only, cap 1, 10 % buffer, warm-up 260. Diagnostics vs buy & hold and vol-targeted buy & hold (the no-trend benchmark), Sharpe SE √((1+SR²/2)/T), stress windows, DSR/PBO over the template grid. Template `carver_trend` in TR-010",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT bootcamp 2, R-QT review"
+  },
+  "TR-019": {
+    "id": "TR-019",
+    "name": "Prop-firm challenge Monte Carlo",
+    "definition": "Two phases (+10 %, +5 %), daily loss 5 %, total loss 10 % of the initial capital, ≥ 4 days, 250-day horizon per phase; OOS daily net returns block-bootstrapped (20 d), rescaled to each vol target; P(funded), P(fail in phase 1), median days. Close-to-close (optimistic vs intraday checks)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT bootcamp 2 (video 32/35)"
+  },
+  "TR-010": {
+    "id": "TR-010",
+    "name": "Strategy library",
+    "definition": "Trend (MA/triple-EMA/TEMA cross, Donchian, SuperTrend), momentum (TS & cross-sectional 12-1), mean reversion (RSI/Bollinger/z-score), pairs (from Q-003), carry (FX/curve), factor long/short (from SC-004), volatility targeting overlay",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT, CB, QP-L37/L42"
+  },
+  "TR-011": {
+    "id": "TR-011",
+    "name": "Signal monitor",
+    "definition": "Current signals of saved strategies on watchlists, history of signals",
+    "section": "V5 — Trading (decide & act)",
+    "source": "15-TV"
+  },
+  "TR-012": {
+    "id": "TR-012",
+    "name": "Alert rules",
+    "definition": "Signal/threshold alerts → notifications (and optional webhook out)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "15-TV"
+  },
+  "TR-013": {
+    "id": "TR-013",
+    "name": "Execution cost models",
+    "definition": "Spread, square-root impact, Almgren–Chriss schedules, TWAP/VWAP",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QP-L28, 15-TV"
+  },
+  "TR-020": {
+    "id": "TR-020",
+    "name": "Alpha factor lab",
+    "definition": "IC, rank IC, IC decay, quantile returns, turnover, sector breakdown",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QP-L38, CB-08"
+  },
+  "TR-021": {
+    "id": "TR-021",
+    "name": "AFML toolkit",
+    "definition": "Labelling (fixed horizon with dynamic σ thresholds, triple barrier, meta-labelling with precision-vs-base-rate evaluation), label concurrency & uniqueness weights (event day excluded — notebook fix), sequential bootstrap, return attribution & time-decay weights, purged K-fold + embargo, feature importance MDI/MDA/SFI + orthogonalised (PCA) features, nested CV hyper-parameter search (log-uniform), bet sizing (from probabilities, averaging active bets, discretisation, dynamic limit prices), frac-diff & structural-break & entropy & microstructure features from TS-",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML"
+  },
+  "TR-022": {
+    "id": "TR-022",
+    "name": "ML models",
+    "definition": "Gradient boosting / random forest classifiers with purged CV; calibration; feature importance",
+    "section": "V5 — Trading (decide & act)",
+    "source": "AFML-5/8"
+  },
+  "TR-023": {
+    "id": "TR-023",
+    "name": "Foundation-model forecasting",
+    "definition": "Chronos-2, TimesFM 2.5 quantile forecasts vs naive/ARIMA, rolling-origin errors (MASE, CRPS)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "EXT"
+  },
+  "TR-030": {
+    "id": "TR-030",
+    "name": "Option strategy builder",
+    "definition": "Presets (covered call, protective put, collar, CSP, verticals, straddle/strangle, strip/strap, iron condor, butterfly, calendar, diagonal, risk reversal); payoff at expiry & today; aggregated Greeks; P&L surface (spot × time, spot × vol)",
+    "section": "V5 — Trading (decide & act)",
+    "source": "Options nb, QG"
+  },
+  "TR-031": {
+    "id": "TR-031",
+    "name": "Option strategy backtests",
+    "definition": "Systematic option-selling/buying rules with historical chains when available",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QG-105…113"
+  },
+  "TR-040": {
+    "id": "TR-040",
+    "name": "Paper trading",
+    "definition": "Simulated accounts, order types, fills with cost model, positions, P&L reconciliation",
+    "section": "V5 — Trading (decide & act)",
+    "source": "CB-11"
+  },
+  "TR-041": {
+    "id": "TR-041",
+    "name": "Broker integration",
+    "definition": "IBKR read-only (positions, transactions) → then optional order routing behind per-order confirmation",
+    "section": "V5 — Trading (decide & act)",
+    "source": "CB-10…12"
+  },
+  "TR-042": {
+    "id": "TR-042",
+    "name": "Execution analytics",
+    "definition": "Implementation shortfall, slippage vs model, fill quality",
+    "section": "V5 — Trading (decide & act)",
+    "source": "15-TV"
+  },
+  "AI-001": {
+    "id": "AI-001",
+    "name": "Tool layer",
+    "definition": "Every catalog analysis + data, navigation and write actions as typed tools (JSON Schema from registry params)",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-002": {
+    "id": "AI-002",
+    "name": "MCP server",
+    "definition": "Same tools via Model Context Protocol (stdio + localhost HTTP)",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-003": {
+    "id": "AI-003",
+    "name": "Analyst agent",
+    "definition": "Conversational analyst with tool search, cited numbers, panel opening, report drafting",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-004": {
+    "id": "AI-004",
+    "name": "Filings reader",
+    "definition": "10-K/10-Q/20-F/annual report section extraction (business, risk factors, MD&A), YoY risk-factor diff, summaries with citations",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-005": {
+    "id": "AI-005",
+    "name": "News & sentiment",
+    "definition": "Free headlines per ticker (yfinance), headline sentiment in [−1, 1] rated by the configured LLM (D-AI-7), daily index = mean score of the session's headlines (assigned to the first session on or after the UTC publication date), trailing index = pooled mean over the last `window` sessions, Pearson correlation of the daily index with same-session and next-session simple returns (null below `min_days`), LLM digest with cited headlines",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-006": {
+    "id": "AI-006",
+    "name": "Investment & trading agent",
+    "definition": "Agent access to IN-/TR- tools with guardrails (validation-before-claim, confirmation for any write or order)",
+    "section": "V6 — Agentic AI (last)"
+  },
+  "AI-007": {
+    "id": "AI-007",
+    "name": "Agent evaluation",
+    "definition": "50+ question gold set, numeric-accuracy & citation scorer, regression on every prompt/tool change",
+    "section": "V6 — Agentic AI (last)"
+  }
+}

@@ -1,0 +1,1 @@
+{"__df__":[{"__a__":"obj","v":[{"__d__":"2022-06-06"}]},{"__a__":"obj","v":["split"]},{"__a__":"float","v":[20.0]},{"__a__":"float","v":[null]},{"__a__":"obj","v":[{"__f__":"nan"}]},{"__a__":"obj","v":["yfinance"]}],"attrs":{},"columns":{"__ix__":{"__a__":"obj","v":["ex_date","action","ratio","amount","currency","source"]},"name":null},"index":{"__ri__":[0,1,1],"name":null}}

@@ -1,0 +1,17 @@
+[project]
+name = "fda-core"
+version = "0.1.0"
+description = "Analytics engine — pure functions, no I/O, no imports from other workspace packages"
+requires-python = ">=3.12"
+dependencies = [
+    "arch>=7.0",
+    "numpy>=2.1",
+    "pandas>=2.2",
+    "pydantic>=2.9",
+    "scipy>=1.14",
+    "statsmodels>=0.14",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

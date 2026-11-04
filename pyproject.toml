@@ -1,0 +1,69 @@
+[project]
+name = "fda-workspace"
+version = "0.1.0"
+description = "Financial Data Analysis Workbench — monorepo root (not a distributable package)"
+requires-python = ">=3.12"
+dependencies = [
+    "fda-core",
+    "fda-data",
+    "fda-contracts",
+    "fda-api",
+    "fda-worker",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.115",
+    "httpx2>=2.16",
+    "pre-commit>=4.0",
+    "empyrical-reloaded>=0.7.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/api", "apps/worker"]
+
+[tool.uv.sources]
+fda-core = { workspace = true }
+fda-data = { workspace = true }
+fda-contracts = { workspace = true }
+fda-demo = { workspace = true }
+fda-api = { workspace = true }
+fda-worker = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["apps/web", "notebooks", "docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "N", "RUF", "PT"]
+# Formulas in docstrings and messages use real math symbols (catalog notation).
+allowed-confusables = ["−", "×", "α", "σ", "–", "ν", "γ"]
+
+[tool.ruff.lint.per-file-ignores]
+# HTML/CSS report templates: long literal lines are clearer unwrapped.
+"apps/api/src/fda_api/reports.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fda_core", "fda_data", "fda_contracts", "fda_api", "fda_worker"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["packages/fda_core/src"]
+
+[[tool.mypy.overrides]]
+module = ["pandas", "pandas.*", "scipy", "scipy.*", "statsmodels", "statsmodels.*", "arch", "arch.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -q -m 'not live'"
+markers = ["live: hits real provider APIs (opt-in: uv run pytest -m live)"]
+testpaths = ["packages", "apps/api", "apps/worker", "tests"]

@@ -1,0 +1,113 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'dockview-react/dist/styles/dockview.css';
+@import 'tailwindcss';
+@import './design/tokens.css';
+@import './design/dockview-theme.css';
+
+@theme inline {
+  --color-bg-0: var(--bg-0);
+  --color-bg-1: var(--bg-1);
+  --color-bg-2: var(--bg-2);
+  --color-bg-sel: var(--bg-sel);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-fg-1: var(--fg-1);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-warn: var(--warn);
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --radius-xs: 2px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  font-feature-settings:
+    'tnum' 1,
+    'cv11' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.micro-label {
+  font-size: 10.5px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Context bar selects: flat tokens inside the topbar (UI_UX §5). */
+.ctx-select {
+  appearance: none;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--fg-1);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ctx-select:hover {
+  background: var(--bg-2);
+}
+
+.ctx-select option {
+  background: var(--bg-1);
+  color: var(--fg-1);
+}
+
+/* cmdk group headings as micro-labels */
+.palette-group [cmdk-group-heading] {
+  padding: 6px 12px 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+/* Panel tables fit their panel: long words in text cells hyphenate (e.g. "heterosked-
+   astic") so the table shrinks instead of scrolling sideways; numbers stay whole. */
+.panel-body :is(td, dt, dd):not(.text-right) {
+  hyphens: auto;
+}
+
+/* Cyfouri signature: the black logo turns light on the dark theme */
+:root[data-theme='graphite'] .cyfouri-signature {
+  filter: invert(1);
+}

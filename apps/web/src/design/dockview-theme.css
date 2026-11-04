@@ -1,0 +1,125 @@
+/* Zero-Slop dockview theme: adjacent groups, 1 px rules, flat 28 px tab strip. */
+.dockview-theme-fda {
+  --dv-group-view-background-color: var(--bg-0);
+  --dv-tabs-and-actions-container-background-color: var(--bg-1);
+  --dv-tabs-and-actions-container-height: var(--panel-header-h);
+  --dv-tabs-and-actions-container-font-size: 10.5px;
+  --dv-activegroup-visiblepanel-tab-background-color: var(--bg-0);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--bg-1);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--bg-0);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--bg-1);
+  --dv-activegroup-visiblepanel-tab-color: var(--fg-1);
+  --dv-activegroup-hiddenpanel-tab-color: var(--fg-2);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--fg-2);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--fg-3);
+  --dv-tab-divider-color: var(--rule);
+  --dv-separator-border: var(--rule);
+  --dv-paneview-header-border-color: var(--rule);
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--accent);
+  --dv-drag-over-background-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  --dv-drag-over-border-color: var(--accent);
+  --dv-icon-hover-background-color: var(--bg-2);
+  --dv-floating-box-shadow: none;
+  --dv-floating-border: 1px solid var(--rule-strong);
+  --dv-border-radius: 0px;
+  --dv-tab-border-radius: 0px;
+  --dv-sash-border-radius: 0px;
+  --dv-dropdown-border-radius: 0px;
+  --dv-tab-margin: 0;
+  --dv-spacing-padding: 0px;
+  --dv-scrollbar-background-color: var(--rule-strong);
+  --dv-context-menu-background-color: var(--bg-1);
+  --dv-context-menu-color: var(--fg-1);
+  /* popups (tab overflow list) above the panels; the library default resolves to auto here */
+  --dv-overlay-z-index: 999;
+}
+
+/* Tabs: plain words (no spaced capitals), tight padding, content width. They shrink with an
+   ellipsis before the "+n panels" menu takes the rest, so no tab is ever cut in half. */
+.dockview-theme-fda .dv-scrollable,
+.dockview-theme-fda .dv-tabs-container {
+  min-width: 0;
+}
+.dockview-theme-fda .dv-tabs-container {
+  overflow: hidden;
+}
+.dockview-theme-fda .dv-tab {
+  flex: 0 1 auto;
+  min-width: 96px;
+  max-width: 240px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-right: 1px solid var(--rule);
+}
+.dockview-theme-fda .dv-default-tab {
+  gap: 6px;
+  min-width: 0;
+}
+.dockview-theme-fda .dv-default-tab-content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* the visible tab keeps its full name; the others shrink */
+.dockview-theme-fda .dv-tab.dv-active-tab {
+  flex-shrink: 0;
+}
+/* the close cross only where it is useful: visible tab or hover */
+.dockview-theme-fda .dv-tab.dv-inactive-tab:not(:hover) .dv-default-tab-action {
+  display: none;
+}
+/* selected tab: a thin underline (accent in the focused group), no box */
+.dockview-theme-fda .dv-tab.dv-active-tab {
+  box-shadow: inset 0 -1px 0 var(--fg-3);
+}
+.dockview-theme-fda .dv-groupview.dv-active-group .dv-tab.dv-active-tab {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* Tab overflow: "+n panels ▾" instead of a bare chevron, and a readable list of the hidden
+   panels (one click activates the panel). */
+.dockview-theme-fda .dv-tabs-overflow-dropdown-default {
+  height: 100%;
+  gap: 4px;
+  padding: 0 10px;
+  border-left: 1px solid var(--rule);
+  color: var(--fg-1);
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dockview-theme-fda .dv-tabs-overflow-dropdown-default:hover {
+  background: var(--bg-2);
+}
+.dockview-theme-fda .dv-tabs-overflow-dropdown-default > svg {
+  display: none;
+}
+.dockview-theme-fda .dv-tabs-overflow-dropdown-default > span::before {
+  content: '+';
+}
+.dockview-theme-fda .dv-tabs-overflow-dropdown-default > span::after {
+  content: ' panels ▾';
+  color: var(--fg-3);
+}
+.dockview-theme-fda .dv-tabs-overflow-container {
+  min-width: 220px;
+  max-height: 60vh;
+  border: 1px solid var(--rule-strong);
+  background: var(--bg-1);
+}
+.dockview-theme-fda .dv-tabs-overflow-container .dv-tab {
+  display: block;
+  height: auto;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--fg-2);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dockview-theme-fda .dv-tabs-overflow-container .dv-tab:hover {
+  background: var(--bg-2);
+  color: var(--fg-1);
+}

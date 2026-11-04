@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+        working-directory: .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: API types are up to date
+        run: |
+          uv run python -m fda_api.export_openapi src/api/openapi.json
+          pnpm gen:api
+          git diff --exit-code -- src/api
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e

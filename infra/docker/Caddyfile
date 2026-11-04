@@ -1,0 +1,45 @@
+# Web app + API on one origin (M31 §4). FDA_SITE ":80" serves plain HTTP; a domain name
+# (e.g. "fda.example.org") gets automatic HTTPS from Let's Encrypt.
+{
+	admin off
+}
+
+(auth-off) {
+}
+
+# Optional shared password in front of everything (on top of FDA_AUTH_MODE=accounts or for a
+# single-user server): FDA_AUTH=basic plus a bcrypt hash from
+#   docker run --rm caddy:2.10-alpine caddy hash-password --plaintext '<password>'
+# /mcp is exempt: it checks its own bearer token (FDA_MCP_TOKEN).
+(auth-basic) {
+	@protected not path /mcp
+	basic_auth @protected {
+		{$FDA_BASIC_AUTH_USER:fda} {$FDA_BASIC_AUTH_HASH}
+	}
+}
+
+{$FDA_SITE::80} {
+	encode zstd gzip
+	import auth-{$FDA_AUTH:off}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy same-origin
+		-Server
+	}
+
+	@api path /v1/* /mcp
+	handle @api {
+		# analyses stream NDJSON and jobs stream SSE: forward every chunk at once
+		reverse_proxy {$FDA_API_UPSTREAM:api:8000} {
+			flush_interval -1
+		}
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

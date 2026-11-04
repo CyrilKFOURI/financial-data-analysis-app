@@ -1,0 +1,55 @@
+/* Design tokens — docs/UI_UX.md §3–4. Graphite (dark) is the default theme. */
+:root,
+:root[data-theme='graphite'] {
+  color-scheme: dark;
+  --bg-0: #0b0d10;
+  --bg-1: #11141a;
+  --bg-2: #171b22;
+  --bg-sel: #1c2533;
+  --rule: #232833;
+  --rule-strong: #2e3441;
+  --fg-1: #e6e8eb;
+  --fg-2: #9aa3af;
+  --fg-3: #5f6875;
+  --accent: #4c8dff;
+  --up: #2ebd85;
+  --down: #e5484d;
+  --warn: #e0a526;
+  --info: #7c8ca3;
+}
+
+:root[data-theme='paper'] {
+  color-scheme: light;
+  --bg-0: #ffffff;
+  --bg-1: #f7f8fa;
+  --bg-2: #eef0f3;
+  --bg-sel: #e3ebf7;
+  --rule: #e2e5ea;
+  --rule-strong: #cdd2d9;
+  --fg-1: #0e1116;
+  --fg-2: #4b5563;
+  --fg-3: #8a929e;
+  --accent: #1f5fd1;
+  --up: #0e8a5f;
+  --down: #c9353a;
+  --warn: #a86f00;
+  --info: #5a6b85;
+}
+
+:root {
+  /* Series palette (max 6 per chart, in order) */
+  --series-1: #4c8dff;
+  --series-2: #e0a526;
+  --series-3: #a78bfa;
+  --series-4: #2ebd85;
+  --series-5: #f472b6;
+  --series-6: #94a3b8;
+
+  /* Layout metrics */
+  --topbar-h: 36px;
+  --rail-w: 60px;
+  --tabs-h: 30px;
+  --panel-header-h: 28px;
+  --statusbar-h: 22px;
+  --drawer-w: 380px;
+}
