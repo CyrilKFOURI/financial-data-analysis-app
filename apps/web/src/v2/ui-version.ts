@@ -4,7 +4,8 @@ import { create } from 'zustand'
 export type UiVersion = 'v1' | 'v2'
 
 const STORAGE_KEY = 'fda.ui-version'
-const DEFAULT_VERSION: UiVersion = 'v1'
+/** V1 unless the build says otherwise (`VITE_UI_DEFAULT=v2`, used by the V2 preview site). */
+const DEFAULT_VERSION: UiVersion = import.meta.env.VITE_UI_DEFAULT === 'v2' ? 'v2' : 'v1'
 
 const isVersion = (value: unknown): value is UiVersion => value === 'v1' || value === 'v2'
 
