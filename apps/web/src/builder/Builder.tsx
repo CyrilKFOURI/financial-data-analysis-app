@@ -185,6 +185,8 @@ function Editor({
   const [nodes, setNodes, onNodesChange] = useNodesState<BlockNodeType>(initial.nodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges)
   const [view, setView] = useState<View>('visual')
+  // below 1024 px the palette and the inspector are sheets over the canvas (spec 331 §4)
+  const [sheet, setSheet] = useState<'palette' | 'inspector' | null>(null)
   const [name, setName] = useState(
     strategy?.name ??
       (templateName === 'rsi_bounce'
@@ -497,14 +499,54 @@ function Editor({
           {status}
         </span>
         <div className="bld-actions">
-          <button type="button" className="v2-btn quiet" onClick={undo} title="Undo (Ctrl Z)">
-            Undo
+          <button
+            type="button"
+            className="v2-btn bld-sheet-btn"
+            aria-expanded={sheet === 'palette'}
+            onClick={() => setSheet('palette')}
+          >
+            Blocks
           </button>
-          <button type="button" className="v2-btn quiet" onClick={redo} title="Redo (Ctrl Shift Z)">
-            Redo
+          <button
+            type="button"
+            className="v2-btn bld-sheet-btn"
+            aria-expanded={sheet === 'inspector'}
+            onClick={() => setSheet('inspector')}
+          >
+            Inspector
+          </button>
+          <button
+            type="button"
+            className="v2-btn quiet"
+            onClick={undo}
+            title="Undo (Ctrl Z)"
+            aria-label="Undo"
+          >
+            <span className="bld-long">Undo</span>
+            <span className="bld-short" aria-hidden>
+              ↶
+            </span>
+          </button>
+          <button
+            type="button"
+            className="v2-btn quiet"
+            onClick={redo}
+            title="Redo (Ctrl Shift Z)"
+            aria-label="Redo"
+          >
+            <span className="bld-long">Redo</span>
+            <span className="bld-short" aria-hidden>
+              ↷
+            </span>
           </button>
           <button type="button" className="v2-btn" onClick={() => void save()}>
-            {strategy ? 'Save' : 'Save as strategy'}
+            {strategy ? (
+              'Save'
+            ) : (
+              <span>
+                Save<span className="bld-long"> as strategy</span>
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -546,7 +588,16 @@ function Editor({
         </div>
       ) : null}
       <div className="bld-main">
-        <aside className="bld-palette" aria-label="Components">
+        {sheet ? (
+          <div className="v2-scrim bld-scrim" aria-hidden onClick={() => setSheet(null)} />
+        ) : null}
+        <aside className="bld-palette" aria-label="Components" data-open={sheet === 'palette'}>
+          <div className="v2-sheet-head">
+            <span>Blocks</span>
+            <button type="button" className="v2-btn quiet" onClick={() => setSheet(null)}>
+              Done
+            </button>
+          </div>
           <div className="bld-palette-head">Components</div>
           {catalogue.map((b) => (
             <button
@@ -558,7 +609,10 @@ function Editor({
                 e.dataTransfer.setData('application/x-block', b.type)
                 e.dataTransfer.effectAllowed = 'move'
               }}
-              onClick={() => addBlock(b.type)}
+              onClick={() => {
+                addBlock(b.type)
+                setSheet(null)
+              }}
               title={b.help}
             >
               <span className="t">{b.title}</span>
@@ -609,7 +663,13 @@ function Editor({
             />
           )}
         </div>
-        <aside className="bld-inspector" aria-label="Inspector">
+        <aside className="bld-inspector" aria-label="Inspector" data-open={sheet === 'inspector'}>
+          <div className="v2-sheet-head">
+            <span>Inspector</span>
+            <button type="button" className="v2-btn quiet" onClick={() => setSheet(null)}>
+              Done
+            </button>
+          </div>
           {selected ? (
             <BlockInspector
               key={selected.id}

@@ -237,7 +237,7 @@ export function PortfolioV2() {
           </>
         }
       />
-      <div className="flex min-h-0 flex-1">
+      <div className="v2-body flex min-h-0 flex-1">
         <SideNav
           pages={PAGES}
           current={current.key}

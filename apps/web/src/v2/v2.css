@@ -147,6 +147,11 @@
   color: var(--fg-1);
   white-space: nowrap;
 }
+.v2-brand {
+  height: 24px;
+  width: auto;
+  opacity: 0.8;
+}
 .v2-mark-glyph {
   display: grid;
   place-items: center;
@@ -495,6 +500,8 @@
   border-bottom: 1px solid var(--rule);
 }
 .v2-block {
+  grid-column: span var(--span, 6) / span var(--span, 6);
+  height: var(--h, 340px);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -1002,4 +1009,609 @@
 }
 .v2-steps .state[data-state='review'] {
   background: var(--warn);
+}
+
+/* ======================================================================================
+   Phone, tablet and laptop (docs/features/331-responsive/plan.md).
+   Laptop (>= 1280 px) must not move: the rules below either reproduce what the markup did
+   before (frame, menus) or live in a max-width query / behind pointer: coarse, and every
+   new element is hidden from 1280 px.
+   ====================================================================================== */
+
+.v2-frame {
+  display: grid;
+  height: 100%;
+  grid-template-rows: var(--v2-top-h) minmax(0, 1fr) var(--statusbar-h);
+  /* the column is the viewport, never the min-content width of the top bar */
+  grid-template-columns: minmax(0, 1fr);
+  /* clip, not hidden: a clipped box cannot be scrolled sideways by scrollIntoView */
+  overflow: clip;
+}
+.v2-tabbar,
+.v2-ctx,
+.v2-more,
+.v2-sectionbar,
+.v2-sheet-head,
+.v2-phone-only,
+.v2-scrim,
+.v2-settings .short {
+  display: none;
+}
+.v2-menu-anchor {
+  position: relative;
+}
+.v2-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  z-index: 40;
+  width: 224px;
+  padding: 4px 0;
+  border: 1px solid var(--rule-strong);
+  background: var(--bg-1);
+  /* slop-ok: a floating menu is the one place a shadow separates layers */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+.v2-more .v2-menu,
+.v2-ctx .v2-menu {
+  right: 0;
+}
+.v2-menu-actions {
+  display: flex;
+  flex-direction: column;
+}
+.v2-menu-actions > *,
+.v2-menu-actions > .v2-btn.primary {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font: 13px var(--ui-sans);
+  text-align: left;
+  white-space: normal;
+}
+.v2-menu-actions > :is(a, button):hover {
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+.v2-menu-actions > .v2-model-flag {
+  color: var(--warn);
+}
+.v2-menu-params {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+.v2-menu-params .v2-param {
+  justify-content: space-between;
+  height: 36px;
+}
+.v2-ctx-btn {
+  align-self: center;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: var(--bg-param);
+  color: var(--fg-1);
+  font: 12.5px var(--ui-mono);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2-ctx-btn:hover {
+  border-color: var(--fg-3);
+}
+
+/* ---------- below 1280: the context selects fold into one button ---------- */
+
+@media (max-width: 1279px) {
+  .v2-params {
+    display: none;
+  }
+  .v2-ctx {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-left: 8px;
+  }
+  .v2-search {
+    min-width: 140px;
+    max-width: 280px;
+  }
+}
+
+/* ---------- tablet and phone (< 1024): one column of blocks, compact title row ---------- */
+
+@media (max-width: 1023px) {
+  .v2-search {
+    flex: none;
+    justify-content: center;
+    width: 32px;
+    min-width: 0;
+    margin: 0 4px 0 8px;
+    padding: 0;
+  }
+  .v2-search > span,
+  .v2-search kbd {
+    display: none;
+  }
+  .v2-mark {
+    padding: 0 8px 0 12px;
+  }
+  .v2-mark .word {
+    display: none;
+  }
+
+  .v2-title {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 6px 16px;
+  }
+  .v2-crumbs {
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .v2-crumbs > span[aria-hidden] {
+    display: none;
+  }
+  .v2-crumbs a {
+    font-size: 11.5px;
+    line-height: 15px;
+  }
+  .v2-crumbs a::before {
+    content: '‹ ';
+  }
+  .v2-crumbs h1 {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .v2-title .sub {
+    order: 3;
+    flex-basis: 100%;
+    white-space: normal;
+  }
+  .v2-title .actions > :not(.primary):not(.v2-model-flag) {
+    display: none;
+  }
+  .v2-title:has(.actions > :not(.primary):not(.v2-model-flag)) .v2-more {
+    display: block;
+  }
+
+  /* tab strips scroll sideways, the side with more fades, the active tab is brought into view */
+  .v2-pagetabs,
+  .v2-steps,
+  .v2-tabs {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .v2-pagetabs::-webkit-scrollbar,
+  .v2-steps::-webkit-scrollbar,
+  .v2-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .v2-pagetabs > a,
+  .v2-steps > a {
+    scroll-snap-align: start;
+  }
+  .v2-pagetabs {
+    height: 36px;
+    margin-left: -10px;
+    /* slop-ok: an edge fade marks a strip that scrolls, it is not a decorative gradient */
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+  .v2-title .sub:has(.v2-pagetabs) {
+    margin: 0 -16px -6px;
+    padding-left: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .v2-block {
+    grid-column: 1 / -1;
+    height: min(var(--h, 340px), 460px);
+  }
+  .v2-split > * {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+  .v2-split > * + * {
+    border-top: 1px solid var(--rule);
+  }
+
+  .v2-inspector {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    width: min(360px, 100%);
+    border-left-color: var(--rule-strong);
+  }
+
+  .v2-statusbar {
+    overflow: hidden;
+  }
+  .v2-statusbar footer {
+    white-space: nowrap;
+  }
+
+  .v2-boot {
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    padding: 6px 16px;
+  }
+  .v2-boot .track {
+    width: 120px;
+  }
+
+  /* V1 list pages inside a V2 frame: tables scroll sideways with their first column held */
+  .v2-framed table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .v2-framed :is(td, th):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg-0);
+  }
+  .v2-framed :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+    max-width: 100%;
+  }
+}
+
+/* ---------- below 768: the section column becomes a bar and a drawer ---------- */
+
+@media (max-width: 767px) {
+  .v2-ctx-btn .rest {
+    display: none;
+  }
+  .v2-body {
+    flex-direction: column;
+  }
+  .v2-sectionbar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg-1);
+    color: var(--fg-1);
+    font: 13px var(--ui-sans);
+    text-align: left;
+    cursor: pointer;
+  }
+  .v2-sectionbar .cur {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .v2-sectionbar .more {
+    margin-left: auto;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .v2-body > .v2-sidenav {
+    display: none;
+  }
+  .v2-body > .v2-sidenav[data-open='true'] {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    width: min(320px, 88vw);
+    padding-top: 0;
+    border-right-color: var(--rule-strong);
+  }
+  .v2-sidenav[data-open='true'] .v2-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 8px 0 14px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--fg-1);
+    font-weight: 600;
+  }
+  .v2-scrim.v2-scrim-sections {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .v2-sidenav .v2-navlink {
+    min-height: 36px;
+  }
+  .v2-sidenav .anchors button {
+    min-height: 32px;
+  }
+  .v2-block {
+    height: min(var(--h, 340px), 400px);
+  }
+}
+
+/* ---------- phone (< 640): bottom tab bar, sheets, 12 px gutters ---------- */
+
+@media (max-width: 639px) {
+  :root[data-ui='v2'] {
+    --v2-top-h: 44px;
+  }
+  .v2-frame {
+    height: 100dvh;
+    grid-template-rows:
+      calc(var(--v2-top-h) + env(safe-area-inset-top)) minmax(0, 1fr)
+      calc(56px + env(safe-area-inset-bottom));
+  }
+  .v2-top {
+    height: auto;
+    padding-top: env(safe-area-inset-top);
+  }
+  .v2-nav,
+  .v2-statusbar {
+    display: none;
+  }
+  .v2-search {
+    flex: 1;
+    justify-content: flex-start;
+    width: auto;
+    height: 32px;
+    margin: 0 4px;
+    padding: 0 8px;
+  }
+  .v2-search > span {
+    display: block;
+  }
+  .v2-ctx {
+    margin-left: 4px;
+    padding-left: 0;
+  }
+  .v2-ctx-btn {
+    height: 32px;
+    padding: 0 7px;
+  }
+  .v2-settings {
+    padding: 0 6px 0 2px;
+  }
+  .v2-settings .long {
+    display: none;
+  }
+  .v2-settings .short {
+    display: inline;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  .v2-settings .v2-btn {
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .v2-tabbar {
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--rule);
+    background: var(--bg-1);
+  }
+  .v2-tabbar a {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+    border-top: 2px solid transparent;
+    margin-top: -1px;
+    color: var(--fg-3);
+    font-size: 11px;
+    line-height: 13px;
+    text-decoration: none;
+  }
+  .v2-tabbar svg {
+    width: 20px;
+    height: 20px;
+  }
+  .v2-tabbar a[data-active='true'] {
+    border-top-color: var(--accent);
+    color: var(--fg-1);
+    font-weight: 500;
+  }
+
+  /* menus are bottom sheets */
+  .v2-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .v2-menu {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 70;
+    width: auto;
+    max-height: 85dvh;
+    overflow-y: auto;
+    padding: 0 0 calc(8px + env(safe-area-inset-bottom));
+    border: 0;
+    border-top: 1px solid var(--rule-strong);
+    box-shadow: none;
+  }
+  .v2-menu > .v2-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 8px 0 16px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--fg-1);
+    font-weight: 600;
+  }
+  .v2-phone-only {
+    display: block;
+  }
+  .v2-menu :is([role='menuitem'], .v2-menu-actions > *) {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .v2-menu-params {
+    padding: 4px 8px;
+  }
+  .v2-menu-params .v2-param {
+    height: 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .v2-title {
+    min-height: 0;
+    padding: 6px 12px;
+  }
+  .v2-title .sub:has(.v2-pagetabs) {
+    margin: 0 -12px -6px;
+    padding-left: 12px;
+  }
+  .v2-section-head {
+    padding: 14px 12px 6px;
+  }
+  .v2-lead {
+    padding: 10px 12px;
+  }
+  .v2-block {
+    height: min(var(--h, 340px), 360px);
+  }
+  .v2-boot {
+    padding: 6px 12px;
+  }
+  .v2-boot .detail {
+    display: none;
+  }
+  .v2-boot .track {
+    width: 100%;
+  }
+  .v2-framed > div {
+    padding: 12px !important;
+  }
+  /* one line per row: the table scrolls sideways under its held first column */
+  .v2-framed :is(td, th) {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* the model-output flag keeps its own line, under the title */
+  .v2-title .actions:has(> .v2-model-flag) {
+    order: 4;
+    margin-left: 0;
+  }
+}
+
+/* ---------- touch: 44 px hit boxes around compact controls, 16 px fields (no iOS zoom) ---------- */
+
+@media (pointer: coarse) {
+  :root[data-ui='v2'] {
+    --v2-control-h: 32px;
+  }
+  :root[data-ui='v2']
+    :is(input:not([type='checkbox']):not([type='radio']):not([type='range']), select, textarea) {
+    font-size: 16px !important;
+  }
+  :root[data-ui='v2'] .v2-well :is(select, input),
+  .v2-framed :is(input:not([type='checkbox']):not([type='radio']), select) {
+    height: 32px;
+  }
+}
+
+/* in the base layer on purpose: any utility (absolute, fixed…) still wins */
+@layer base {
+  @media (pointer: coarse) {
+    :root[data-ui='v2']
+      :is(
+        button,
+        [role='tab'],
+        [role='menuitem'],
+        .v2-btn,
+        .v2-nav a,
+        .v2-tabbar a,
+        .v2-pagetabs a,
+        .v2-steps a,
+        .v2-navlink,
+        .v2-crumbs a,
+        .v2-mark,
+        td a,
+        a.flex
+      ) {
+      position: relative;
+      touch-action: manipulation;
+    }
+    /* segments and tabs grow in height only, so a tap never lands on the neighbour */
+    :root[data-ui='v2']
+      :is(
+        button,
+        [role='tab'],
+        [role='menuitem'],
+        .v2-btn,
+        .v2-nav a,
+        .v2-tabbar a,
+        .v2-pagetabs a,
+        .v2-steps a,
+        .v2-navlink,
+        .v2-crumbs a,
+        .v2-mark,
+        td a,
+        a.flex
+      )::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: max(100%, 44px);
+      transform: translateY(-50%);
+    }
+    /* standalone controls grow both ways */
+    :root[data-ui='v2']
+      :is(
+        .v2-btn,
+        .v2-ctx-btn,
+        .v2-search,
+        .v2-crumbs a,
+        .v2-formula,
+        .v2-sectionbar,
+        .v2-mark,
+        td button
+      )::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
+  }
 }

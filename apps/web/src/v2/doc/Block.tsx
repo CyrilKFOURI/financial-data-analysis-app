@@ -45,7 +45,8 @@ export function Block({ views, span, height, title }: BlockProps) {
     <section
       ref={ref}
       className="v2-block"
-      style={{ gridColumn: `span ${span} / span ${span}`, height }}
+      // span and height are variables so the narrow layouts (spec 331 §4) can restack the grid
+      style={{ ['--span' as string]: span, ['--h' as string]: `${height}px` }}
       data-testid={`v2-block-${views[0]?.id}`}
       aria-label={title ?? current.title}
     >

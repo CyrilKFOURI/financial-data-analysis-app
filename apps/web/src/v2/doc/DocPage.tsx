@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { type ReactNode, useEffect, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { AssetPage, PanelSpec } from '../../workspace/pages'
 import { Block } from './Block'
 
@@ -162,10 +162,63 @@ type SideNavProps = {
   header?: ReactNode
 }
 
-/** Left column: every page of the subject, always visible, and the sections of the open one. */
+/** Left column: every page of the subject, always visible, and the sections of the open one.
+ *  Below 768 px it folds into a bar naming the open page; the bar opens the column as a sheet
+ *  (docs/features/331-responsive §4). */
 export function SideNav({ pages, current, activeSection, link, onAnchor, header }: SideNavProps) {
+  const [open, setOpen] = useState(false)
+  const currentPage = pages.find((page) => page.key === current)
   return (
-    <nav className="v2-sidenav" aria-label="Sections">
+    <>
+      <button
+        type="button"
+        className="v2-sectionbar"
+        aria-expanded={open}
+        aria-controls="v2-sections"
+        onClick={() => setOpen(true)}
+      >
+        <span className="text-fg-3">{currentPage?.group ?? 'Page'}</span>
+        <span className="cur">{currentPage?.label}</span>
+        <span className="more">{pages.length} pages ▾</span>
+      </button>
+      {open ? (
+        <div className="v2-scrim v2-scrim-sections" aria-hidden onClick={() => setOpen(false)} />
+      ) : null}
+      <SideNavColumn
+        open={open}
+        onClose={() => setOpen(false)}
+        pages={pages}
+        current={current}
+        activeSection={activeSection}
+        link={link}
+        onAnchor={(key) => {
+          setOpen(false)
+          onAnchor(key)
+        }}
+        header={header}
+      />
+    </>
+  )
+}
+
+function SideNavColumn({
+  pages,
+  current,
+  activeSection,
+  link,
+  onAnchor,
+  header,
+  open,
+  onClose,
+}: SideNavProps & { open: boolean; onClose: () => void }) {
+  return (
+    <nav className="v2-sidenav" id="v2-sections" data-open={open} aria-label="Sections">
+      <div className="v2-sheet-head">
+        <span>Pages</span>
+        <button type="button" className="v2-btn quiet" onClick={onClose}>
+          Done
+        </button>
+      </div>
       {header}
       {pages.map((page, index) => {
         const showGroup = page.group && page.group !== pages[index - 1]?.group
@@ -179,6 +232,7 @@ export function SideNav({ pages, current, activeSection, link, onAnchor, header 
               params={target.params}
               search={(previous: Record<string, unknown>) => previous}
               className="v2-navlink"
+              onClick={onClose}
               data-active={isCurrent}
               aria-current={isCurrent ? 'page' : undefined}
             >

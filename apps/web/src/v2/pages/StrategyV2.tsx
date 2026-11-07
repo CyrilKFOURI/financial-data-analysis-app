@@ -116,7 +116,7 @@ function Hypothesis({ strategy }: { strategy: StrategyRow | undefined }) {
   const grid = Object.entries(strategy.spec.grid ?? {})
   const combinations = grid.reduce((n, [, values]) => n * Math.max(values.length, 1), 1)
   return (
-    <div className="grid grid-cols-12 border-b border-rule">
+    <div className="v2-split grid grid-cols-12 border-b border-rule">
       <section className="col-span-7 border-r border-rule">
         <header className="v2-block-head">
           <h3>Economic hypothesis</h3>

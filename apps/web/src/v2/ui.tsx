@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 /** Small building blocks of interface V2 (spec §4.2): each kind of control has one look. */
 
@@ -41,7 +41,9 @@ type TitleRowProps = {
   actions?: ReactNode
 }
 
-/** Page title row: where am I (crumbs + title), one line of context, the page's actions. */
+/** Page title row: where am I (crumbs + title), one line of context, the page's actions.
+ *  Below 1024 px (docs/features/331-responsive) the last crumb reads as Back, the context wraps
+ *  to its own line, and every action but the primary one moves into an Actions menu. */
 export function TitleRow({ crumbs, title, sub, actions }: TitleRowProps) {
   return (
     <div className="v2-title">
@@ -51,6 +53,85 @@ export function TitleRow({ crumbs, title, sub, actions }: TitleRowProps) {
       </div>
       {sub ? <div className="sub">{sub}</div> : null}
       {actions ? <div className="actions">{actions}</div> : null}
+      {actions ? (
+        <Menu
+          className="v2-more"
+          title="Actions"
+          trigger={({ open, toggle }) => (
+            <button
+              type="button"
+              className="v2-btn"
+              aria-haspopup="menu"
+              aria-expanded={open}
+              onClick={toggle}
+            >
+              Actions ⋯
+            </button>
+          )}
+        >
+          {(close) => (
+            <div className="v2-menu-actions" onClickCapture={close}>
+              {actions}
+            </div>
+          )}
+        </Menu>
+      ) : null}
+    </div>
+  )
+}
+
+/** Closes a popover on a click outside `ref` or on Escape. */
+export function useDismiss(ref: RefObject<HTMLElement | null>, open: boolean, close: () => void) {
+  useEffect(() => {
+    if (!open) return
+    const onEvent = (event: MouseEvent | KeyboardEvent) => {
+      if (
+        event instanceof KeyboardEvent
+          ? event.key === 'Escape'
+          : !ref.current?.contains(event.target as Node)
+      )
+        close()
+    }
+    window.addEventListener('mousedown', onEvent)
+    window.addEventListener('keydown', onEvent)
+    return () => {
+      window.removeEventListener('mousedown', onEvent)
+      window.removeEventListener('keydown', onEvent)
+    }
+  }, [ref, open, close])
+}
+
+type MenuProps = {
+  title: string
+  trigger: (state: { open: boolean; toggle: () => void }) => ReactNode
+  children: (close: () => void) => ReactNode
+  className?: string
+}
+
+/** A popover under its button; on a phone the same content is a bottom sheet with a Done button
+ *  (spec 331 §3). */
+export function Menu({ title, trigger, children, className }: MenuProps) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const close = useCallback(() => setOpen(false), [])
+  useDismiss(ref, open, close)
+  return (
+    <div ref={ref} className={`v2-menu-anchor ${className ?? ''}`}>
+      {trigger({ open, toggle: () => setOpen((v) => !v) })}
+      {open ? (
+        <>
+          <div className="v2-scrim" aria-hidden onClick={close} />
+          <div role="menu" aria-label={title} className="v2-menu">
+            <div className="v2-sheet-head">
+              <span>{title}</span>
+              <button type="button" className="v2-btn quiet" onClick={close}>
+                Done
+              </button>
+            </div>
+            {children(close)}
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

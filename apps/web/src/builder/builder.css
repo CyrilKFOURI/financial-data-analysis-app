@@ -454,3 +454,123 @@
   font-size: 12px;
   line-height: 18px;
 }
+
+/* ---------- phone and tablet (docs/features/331-responsive §4): the canvas takes the width,
+   the palette and the inspector open as sheets from the bar ---------- */
+
+.bld .v2-sheet-head,
+.bld-sheet-btn,
+.bld-short,
+.bld-scrim {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .bld-bar,
+  .bld-hypo,
+  .bld-notice {
+    flex: none;
+  }
+  .bld-bar {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    min-height: 0;
+    padding: 6px 12px;
+  }
+  .bld-name {
+    flex: 1 1 160px;
+    width: auto;
+  }
+  .bld-bar .v2-param {
+    height: auto;
+    padding: 0;
+  }
+  .bld-toggle {
+    margin-left: 0;
+  }
+  .bld-sheet-btn {
+    display: inline-flex;
+  }
+  .bld-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bld-palette,
+  .bld-inspector {
+    display: none;
+  }
+  .bld-palette[data-open='true'],
+  .bld-inspector[data-open='true'] {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 60;
+    width: min(340px, 92vw);
+  }
+  .bld-palette[data-open='true'] {
+    left: 0;
+    border-right-color: var(--rule-strong);
+  }
+  .bld-inspector[data-open='true'] {
+    right: 0;
+    border-left-color: var(--rule-strong);
+  }
+  .bld [data-open='true'] > .v2-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 8px 0 14px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 600;
+  }
+  .v2-scrim.bld-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .bld-hypo label {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+}
+
+@media (max-width: 639px) {
+  .bld-long {
+    display: none;
+  }
+  .bld-short {
+    display: inline;
+    font-size: 15px;
+  }
+  .bld-actions {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+  .bld-actions .v2-btn.primary {
+    margin-left: auto;
+  }
+  .bld-status {
+    white-space: normal;
+  }
+  .bld-hypo,
+  .bld-notice {
+    padding: 6px 12px;
+  }
+  .bld-results {
+    padding: 4px 12px 24px;
+  }
+  .bld-pairs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bld-chart {
+    height: 240px;
+  }
+  .bld-trades {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

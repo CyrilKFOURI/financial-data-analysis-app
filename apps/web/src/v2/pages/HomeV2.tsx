@@ -65,7 +65,7 @@ export function HomeV2() {
         }
       />
       <div className="v2-doc" data-testid="v2-home">
-        <div className="grid grid-cols-12">
+        <div className="v2-split grid grid-cols-12">
           <div className="col-span-8 border-r border-rule">
             <BlockGrid index={MARKETS} places={[{ id: 'mk-overview', span: 12, height: 640 }]} />
           </div>

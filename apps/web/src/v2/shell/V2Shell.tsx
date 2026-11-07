@@ -1,8 +1,9 @@
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { type ComponentType, useEffect, useState, useSyncExternalStore } from 'react'
 import { getMe, SIGNED_OUT_EVENT } from '../../api/client'
-import { DEMO } from '../../demo/config'
+import cyfouriLogo from '../../assets/logo-full.png'
+import { DEMO, DEMO_AS_OF, DEMO_REPO } from '../../demo/config'
 import { getEngineState, subscribeEngineState } from '../../demo/engineState'
 import {
   type AnalysisContext,
@@ -16,24 +17,51 @@ import {
 import { useUiStore } from '../../state/ui-store'
 import { CommandPalette } from '../../shell/CommandPalette'
 import { FormulaDrawer } from '../../shell/FormulaDrawer'
-import { SearchIcon } from '../../shell/icons'
+import {
+  BriefcaseIcon,
+  CompassIcon,
+  FlaskIcon,
+  GlobeIcon,
+  SearchIcon,
+  SparkIcon,
+} from '../../shell/icons'
 import { SignIn } from '../../shell/SignIn'
 import { StatusBar } from '../../shell/StatusBar'
 import { useShortcuts } from '../../shell/useShortcuts'
+import { APP_VERSION } from '../../version'
 import { useUiVersion } from '../ui-version'
-import { ParamSelect } from '../ui'
+import { Menu, ParamSelect } from '../ui'
 
 const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
 
-type Workspace = { label: string; to: string; owns: string[] }
+type Workspace = {
+  label: string
+  /** Label in the phone's bottom tab bar. */
+  short: string
+  icon: ComponentType
+  to: string
+  owns: string[]
+}
 
 /** Five workspaces, each named after the job (spec §5). Assets open from search or any ticker. */
 const WORKSPACES: Workspace[] = [
-  { label: 'Markets', to: '/m', owns: ['/m'] },
-  { label: 'Research', to: '/u', owns: ['/u', '/c', '/a'] },
-  { label: 'Portfolios', to: '/p', owns: ['/p', '/invest'] },
-  { label: 'Trading', to: '/t', owns: ['/t', '/paper', '/alerts'] },
-  { label: 'AI analyst', to: '/ai', owns: ['/ai'] },
+  { label: 'Markets', short: 'Markets', icon: GlobeIcon, to: '/m', owns: ['/m'] },
+  { label: 'Research', short: 'Research', icon: CompassIcon, to: '/u', owns: ['/u', '/c', '/a'] },
+  {
+    label: 'Portfolios',
+    short: 'Portfolios',
+    icon: BriefcaseIcon,
+    to: '/p',
+    owns: ['/p', '/invest'],
+  },
+  {
+    label: 'Trading',
+    short: 'Trading',
+    icon: FlaskIcon,
+    to: '/t',
+    owns: ['/t', '/paper', '/alerts'],
+  },
+  { label: 'AI analyst', short: 'AI', icon: SparkIcon, to: '/ai', owns: ['/ai'] },
 ]
 
 const SETTINGS = [
@@ -45,7 +73,8 @@ const SETTINGS = [
 const ownsPath = (pathname: string, prefix: string) =>
   pathname === prefix || pathname.startsWith(`${prefix}/`)
 
-/** Frame of interface V2: top bar · page · formula drawer · status bar. */
+/** Frame of interface V2: top bar · page · formula drawer · status bar, and on a phone the
+ *  bottom tab bar instead of the status bar (docs/features/331-responsive). */
 export function V2Shell() {
   const theme = useUiStore((s) => s.theme)
   const queryClient = useQueryClient()
@@ -65,7 +94,7 @@ export function V2Shell() {
   if (me.data?.mode === 'accounts' && !me.data.user) return <SignIn />
 
   return (
-    <div className="grid h-full grid-rows-[var(--v2-top-h)_minmax(0,1fr)_var(--statusbar-h)] overflow-hidden">
+    <div className="v2-frame">
       <a
         href="#v2-main"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-bg-1 focus:px-3 focus:py-2"
@@ -73,16 +102,17 @@ export function V2Shell() {
         Skip to content
       </a>
       <TopBar />
-      <div className="flex min-h-0 min-w-0">
-        <main id="v2-main" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 overflow-clip">
+        <main id="v2-main" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-clip">
           {DEMO ? <EngineBoot /> : null}
           <Outlet />
         </main>
         <FormulaDrawer />
       </div>
-      <div className="min-w-0">
+      <div className="v2-statusbar min-w-0">
         <StatusBar />
       </div>
+      <TabBar />
       <CommandPalette />
     </div>
   )
@@ -92,14 +122,14 @@ function TopBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const setPaletteOpen = useUiStore((s) => s.setPaletteOpen)
   const fetching = useIsFetching()
+  useStripsFollowActive(pathname)
 
   return (
     <header className="v2-top relative" role="banner">
-      <Link to="/" className="v2-mark" aria-label="FDA Workbench, home">
-        <span className="v2-mark-glyph" aria-hidden>
-          F
-        </span>
-        Workbench
+      <Link to="/" className="v2-mark" aria-label="Cyfouri · FDA Workbench, home">
+        {/* the Cyfouri signature, as in V1 (dimmed, inverted on the dark theme) */}
+        <img src={cyfouriLogo} alt="" className="cyfouri-signature v2-brand" />
+        <span className="word">Workbench</span>
       </Link>
       <nav className="v2-nav" aria-label="Workspaces">
         {WORKSPACES.map((ws) => (
@@ -124,6 +154,7 @@ function TopBar() {
         <kbd>{isMac ? '⌘K' : 'Ctrl K'}</kbd>
       </button>
       <GlobalParams />
+      <ContextMenu />
       <SettingsMenu />
       {fetching > 0 ? (
         <span className="v2-progress" role="progressbar" aria-label="Loading" />
@@ -134,6 +165,14 @@ function TopBar() {
 
 /** Range, frequency, currency, benchmark: the global context, in the tinted parameter zone. */
 function GlobalParams() {
+  return (
+    <div className="v2-params ml-auto" data-testid="context-bar" aria-label="Analysis context">
+      <ContextSelects />
+    </div>
+  )
+}
+
+function ContextSelects() {
   const search = useSearch({ from: '__root__' })
   const navigate = useNavigate()
   const context = resolveContext(search)
@@ -145,7 +184,7 @@ function GlobalParams() {
     })
 
   return (
-    <div className="v2-params ml-auto" data-testid="context-bar" aria-label="Analysis context">
+    <>
       <ParamSelect
         label="Range"
         value={context.range}
@@ -170,53 +209,74 @@ function GlobalParams() {
         options={BENCHMARKS}
         onChange={(bench) => update({ bench })}
       />
-    </div>
+    </>
   )
 }
 
-/** Theme, interface version and the settings pages, in one menu that stays inside the window. */
+/** Below 1280 px the four context selects fold into one button that shows the context. */
+function ContextMenu() {
+  const context = resolveContext(useSearch({ from: '__root__' }))
+  return (
+    <Menu
+      className="v2-ctx"
+      title="Analysis context"
+      trigger={({ open, toggle }) => (
+        <button
+          type="button"
+          className="v2-ctx-btn"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label={`Analysis context: ${context.range}, ${context.freq}, ${context.ccy}, vs ${context.bench}`}
+          onClick={toggle}
+        >
+          {context.range} · {context.freq}
+          <span className="rest">
+            {' '}
+            · {context.ccy} · vs {context.bench}
+          </span>
+        </button>
+      )}
+    >
+      {() => (
+        <div className="v2-menu-params" data-testid="context-menu">
+          <ContextSelects />
+        </div>
+      )}
+    </Menu>
+  )
+}
+
+/** Theme, interface version and the settings pages, in one menu that stays inside the window.
+ *  On a phone it is a sheet that also carries what the status bar says (spec 331 §3). */
 function SettingsMenu() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
   const setVersion = useUiVersion((s) => s.setVersion)
-
-  useEffect(() => {
-    if (!open) return
-    const close = (event: MouseEvent | KeyboardEvent) => {
-      if (
-        event instanceof KeyboardEvent
-          ? event.key === 'Escape'
-          : !ref.current?.contains(event.target as Node)
-      )
-        setOpen(false)
-    }
-    window.addEventListener('mousedown', close)
-    window.addEventListener('keydown', close)
-    return () => {
-      window.removeEventListener('mousedown', close)
-      window.removeEventListener('keydown', close)
-    }
-  }, [open])
+  const row =
+    'flex w-full items-center justify-between px-3 py-1.5 text-left text-fg-2 hover:bg-bg-2 hover:text-fg-1'
 
   return (
-    <div ref={ref} className="relative flex items-center px-2">
-      <button
-        type="button"
-        className="v2-btn quiet"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        Settings
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          // slop-ok: a floating menu is the one place a shadow separates layers
-          className="absolute top-[calc(100%+4px)] right-2 z-40 w-56 border border-rule-strong bg-bg-1 py-1 shadow-[0_8px_24px_rgba(0,0,0,0.28)]"
+    <Menu
+      className="v2-settings relative flex items-center px-2"
+      title="Settings"
+      trigger={({ open, toggle }) => (
+        <button
+          type="button"
+          className="v2-btn quiet"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label="Settings"
+          onClick={toggle}
         >
+          <span className="long">Settings</span>
+          <span className="short" aria-hidden>
+            ⋯
+          </span>
+        </button>
+      )}
+    >
+      {(close) => (
+        <>
           {SETTINGS.map((item) => (
             <Link
               key={item.to}
@@ -224,32 +284,82 @@ function SettingsMenu() {
               search={(previous) => previous}
               role="menuitem"
               className="block px-3 py-1.5 text-fg-2 hover:bg-bg-2 hover:text-fg-1"
-              onClick={() => setOpen(false)}
+              onClick={close}
             >
               {item.label}
             </Link>
           ))}
           <div className="my-1 border-t border-rule" />
-          <button
-            type="button"
-            role="menuitem"
-            className="flex w-full items-center justify-between px-3 py-1.5 text-left text-fg-2 hover:bg-bg-2 hover:text-fg-1"
-            onClick={toggleTheme}
-          >
+          <button type="button" role="menuitem" className={row} onClick={toggleTheme}>
             Theme <span className="text-fg-3">{theme === 'graphite' ? 'Dark' : 'Light'}</span>
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="flex w-full items-center justify-between px-3 py-1.5 text-left text-fg-2 hover:bg-bg-2 hover:text-fg-1"
-            onClick={() => setVersion('v1')}
-          >
+          <button type="button" role="menuitem" className={row} onClick={() => setVersion('v1')}>
             Interface <span className="text-fg-3">Back to V1</span>
           </button>
-        </div>
-      ) : null}
-    </div>
+          <div className="v2-phone-only">
+            <div className="my-1 border-t border-rule" />
+            {DEMO ? (
+              <a role="menuitem" className={row} href={DEMO_REPO} target="_blank" rel="noreferrer">
+                Full version on GitHub ↗
+              </a>
+            ) : null}
+            <p className="m-0 px-3 py-1.5 text-[12px] text-fg-3">
+              {DEMO
+                ? `Online demo · engine in your browser · data as of ${DEMO_AS_OF || 'build'}`
+                : 'Workbench'}{' '}
+              · v{APP_VERSION}
+            </p>
+          </div>
+        </>
+      )}
+    </Menu>
   )
+}
+
+/** Phone: the five workspaces as a bottom tab bar (spec 331 §3). */
+function TabBar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  return (
+    <nav className="v2-tabbar" aria-label="Main">
+      {WORKSPACES.map((ws) => {
+        const active = ws.owns.some((prefix) => ownsPath(pathname, prefix))
+        const Icon = ws.icon
+        return (
+          <Link
+            key={ws.to}
+            to={ws.to}
+            search={(previous) => previous}
+            data-active={active}
+            aria-current={active ? 'page' : undefined}
+            aria-label={ws.label}
+          >
+            <Icon />
+            <span>{ws.short}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
+/** Tab strips that scroll sideways (page tabs, protocol steps) keep their active tab in view. */
+function useStripsFollowActive(pathname: string) {
+  useEffect(() => {
+    const follow = () => {
+      for (const strip of document.querySelectorAll<HTMLElement>('.v2-pagetabs, .v2-steps')) {
+        if (strip.scrollWidth <= strip.clientWidth) continue
+        const active = strip.querySelector<HTMLElement>("[data-active='true']")
+        if (!active) continue
+        const left = active.offsetLeft - strip.offsetLeft
+        const right = left + active.offsetWidth
+        if (left < strip.scrollLeft || right > strip.scrollLeft + strip.clientWidth)
+          strip.scrollLeft = left - 24
+      }
+    }
+    // pages render their strips after their data: look again once they have settled
+    const timers = [0, 300, 1200].map((ms) => window.setTimeout(follow, ms))
+    return () => timers.forEach((t) => window.clearTimeout(t))
+  }, [pathname])
 }
 
 /** Online demo: the Python engine boots in the browser (up to a minute on a first visit). Say
@@ -277,7 +387,7 @@ function EngineBoot() {
           ? 'The analytics engine could not start in this browser.'
           : 'Starting the analytics engine in your browser'}
       </span>
-      <span>
+      <span className="detail">
         {failed
           ? 'Reload the page, or try another browser.'
           : `${seconds} s · the first visit downloads the Python engine, later visits start in seconds`}
