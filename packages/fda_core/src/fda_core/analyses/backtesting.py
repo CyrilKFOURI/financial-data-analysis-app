@@ -39,7 +39,7 @@ def _strategy(inputs: AnalysisInputs) -> tuple[dict[str, Any], pd.DataFrame]:
 
 
 def _target(spec: dict[str, Any], close: pd.Series, params: dict[str, float]) -> pd.Series:
-    signal = bt.signal(spec["template"], close, params, spec["short"])
+    signal = bt.signal(spec["template"], close, params, spec["short"], spec.get("graph"))
     return bt.apply_overlays(signal, close, spec.get("overlays") or [])
 
 
@@ -73,7 +73,14 @@ def _evaluate(spec: dict[str, Any], close: pd.Series) -> dict[str, Any]:
     costs, warmup = _costs(spec), int(spec["warmup"])
     grid = _grid(spec)
     trials = bt.grid_returns(
-        spec["template"], close, grid, costs, warmup, spec["short"], spec.get("overlays")
+        spec["template"],
+        close,
+        grid,
+        costs,
+        warmup,
+        spec["short"],
+        spec.get("overlays"),
+        spec.get("graph"),
     )
     cut = _split(trials.index, spec["is_fraction"])
     is_part, oos_part = trials.loc[trials.index < cut], trials.loc[trials.index >= cut]

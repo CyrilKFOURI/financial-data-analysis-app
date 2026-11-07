@@ -33,12 +33,25 @@ export function warmEngine(): void {
   engine()
 }
 
-function runInWorker(body: string): Promise<string> {
+function runInWorker(body: string, op?: string): Promise<string> {
   const id = ++seq
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject })
-    engine().postMessage({ id, body })
+    engine().postMessage({ id, body, op })
   })
+}
+
+/** Strategy builder reads (feature 321): the block catalogue, templates and validation come
+ *  from the same Python engine, so the builder works in the demo without recordings. */
+async function blocksCall(op: string, args: unknown): Promise<Response> {
+  try {
+    return new Response(await runInWorker(JSON.stringify(args), op), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  } catch (error) {
+    return json(422, { detail: String(error) })
+  }
 }
 
 const json = (status: number, value: unknown) =>
@@ -61,6 +74,16 @@ export async function demoFetch(path: string, init?: RequestInit): Promise<Respo
       return json(503, { detail: `The in-browser engine failed to start: ${String(error)}` })
     }
   }
+  if (method === 'GET' && path === '/v1/strategies/blocks') return blocksCall('catalogue', {})
+  if (method === 'GET' && path.startsWith('/v1/strategies/blocks/templates/')) {
+    const url = new URL(path, 'http://demo')
+    return blocksCall('template', {
+      name: url.pathname.split('/').pop(),
+      symbol: (url.searchParams.get('symbol') ?? 'QQQ').toUpperCase(),
+    })
+  }
+  if (method === 'POST' && path === '/v1/strategies/blocks/validate')
+    return blocksCall('validate', JSON.parse(body || '{}'))
   if (method === 'GET' && path.startsWith('/v1/instruments?q=')) {
     const q = decodeURIComponent(path.slice('/v1/instruments?q='.length)).toLowerCase()
     const all = (await (await fetch('/demo/instruments.json')).json()) as {

@@ -7,6 +7,7 @@ import { formatInteger } from '../../format'
 import { STRATEGY_PAGES } from '../../workspace/pages'
 import { BlockGrid, panelIndex } from '../doc/BlockGrid'
 import type { Place } from '../doc/DocPage'
+import { Builder } from '../../builder/Builder'
 import { Crumb, TitleRow } from '../ui'
 
 /** Backtest lab V2: the research protocol as a pipeline of steps (spec §5.4). Validation comes
@@ -91,6 +92,13 @@ function useStepStates() {
   }
 }
 
+const BUILD: Step = {
+  key: 'build',
+  label: 'Build',
+  lead: 'The strategy as a graph of blocks: data, indicators, signals, portfolio simulation.',
+  places: [],
+}
+
 /** V1 page → V2 step. */
 const V1_TO_V2: Record<string, string> = {
   monitor: 'signals',
@@ -166,14 +174,17 @@ export function StrategyV2() {
     queryKey: ['strategy', sid],
     queryFn: () => getStrategy(Number(sid)),
   })
-  const key = STEPS.some((s) => s.key === page) ? page : (V1_TO_V2[page] ?? 'hypothesis')
+  // a strategy built from blocks gets a Build step (feature 321)
+  const isGraph = strategy.data?.spec.template === 'graph' || page === 'build'
+  const steps = isGraph ? [STEPS[0]!, BUILD, ...STEPS.slice(1)] : STEPS
+  const key = steps.some((s) => s.key === page) ? page : (V1_TO_V2[page] ?? 'hypothesis')
   const index = Math.max(
-    STEPS.findIndex((s) => s.key === key),
+    steps.findIndex((s) => s.key === key),
     0,
   )
-  const step = STEPS[index]!
+  const step = steps[index]!
   const stateOf = useStepStates()
-  const next = STEPS[index + 1]
+  const next = steps[index + 1]
 
   useEffect(() => {
     if (key !== page) {
@@ -216,7 +227,7 @@ export function StrategyV2() {
         }
       />
       <nav className="v2-steps" aria-label="Research protocol">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <Link
             key={s.key}
             to="/t/$sid/$page"
@@ -242,26 +253,32 @@ export function StrategyV2() {
           </Link>
         ))}
       </nav>
-      <div className="v2-doc" data-testid={`v2-step-${step.key}`}>
-        <p className="v2-lead">{step.lead}</p>
-        {step.key === 'hypothesis' ? (
-          <Hypothesis strategy={data} />
-        ) : (
-          <BlockGrid key={step.key} index={INDEX} places={step.places} />
-        )}
-        {next ? (
-          <div className="flex justify-end px-4 py-3">
-            <Link
-              className="v2-btn"
-              to="/t/$sid/$page"
-              params={{ sid, page: next.key }}
-              search={(previous) => previous}
-            >
-              Next: {next.label} →
-            </Link>
-          </div>
-        ) : null}
-      </div>
+      {step.key === 'build' ? (
+        <div className="min-h-0 flex-1" data-testid="v2-step-build">
+          <Builder strategyId={Number(sid)} />
+        </div>
+      ) : (
+        <div className="v2-doc" data-testid={`v2-step-${step.key}`}>
+          <p className="v2-lead">{step.lead}</p>
+          {step.key === 'hypothesis' ? (
+            <Hypothesis strategy={data} />
+          ) : (
+            <BlockGrid key={step.key} index={INDEX} places={step.places} />
+          )}
+          {next ? (
+            <div className="flex justify-end px-4 py-3">
+              <Link
+                className="v2-btn"
+                to="/t/$sid/$page"
+                params={{ sid, page: next.key }}
+                search={(previous) => previous}
+              >
+                Next: {next.label} →
+              </Link>
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }

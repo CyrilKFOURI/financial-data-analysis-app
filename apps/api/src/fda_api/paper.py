@@ -167,7 +167,9 @@ def post_strategy_order(
         cost_model(account["costs"]),
     )
     close = bars[symbol]["adj_close"].astype(float)
-    target = float(bt.signal(spec["template"], close, spec["params"], short=False).iloc[-1])
+    target = float(
+        bt.signal(spec["template"], close, spec["params"], False, spec.get("graph")).iloc[-1]
+    )
     target = min(max(target, 0.0), 1.0)
     last = float(bars[symbol]["close"].iloc[-1])
     equity = sim.cash_cents / 100 + sum(p["market_value"] for p in sim.positions.values())

@@ -1,0 +1,456 @@
+/* Strategy builder (feature 321): the Edgebot clone's layout in this app's tokens (both themes,
+   2 px corners, no shadows except the floating menu of React Flow controls). */
+
+.bld {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg-0);
+  color: var(--fg-1);
+}
+
+/* ---------- top bar: name, status, symbol, Visual/Code/Results, actions ---------- */
+
+.bld-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.bld-name {
+  min-width: 0;
+  width: 240px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--fg-1);
+  font: 600 15px var(--ui-sans);
+  padding: 3px 6px;
+}
+.bld-name:hover:not(:disabled),
+.bld-name:focus-visible {
+  border-color: var(--rule-strong);
+}
+.bld-badge {
+  padding: 1px 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  color: var(--fg-2);
+  font-size: 11.5px;
+}
+.bld-toggle {
+  display: inline-flex;
+  margin-left: 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bld-toggle button {
+  height: 26px;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: var(--bg-0);
+  color: var(--fg-2);
+  font: 500 12.5px var(--ui-sans);
+  cursor: pointer;
+}
+.bld-toggle button:last-child {
+  border-right: 0;
+}
+.bld-toggle button:hover {
+  color: var(--fg-1);
+  background: var(--bg-2);
+}
+.bld-toggle button[aria-selected='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.bld-status {
+  color: var(--warn);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.bld-status[data-ok='true'] {
+  color: var(--up);
+}
+.bld-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bld-actions .v2-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.bld-hypo,
+.bld-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg-param);
+  font-size: 12.5px;
+}
+.bld-hypo label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  color: var(--fg-2);
+}
+.bld-hypo input {
+  flex: 1;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: var(--bg-0);
+  color: var(--fg-1);
+}
+.bld-notice {
+  color: var(--fg-1);
+}
+
+/* ---------- three columns: components, stage, inspector ---------- */
+
+.bld-main {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 270px;
+  flex: 1;
+  min-height: 0;
+}
+.bld-palette,
+.bld-inspector {
+  overflow-y: auto;
+  background: var(--bg-1);
+}
+.bld-palette {
+  border-right: 1px solid var(--rule);
+}
+.bld-inspector {
+  border-left: 1px solid var(--rule);
+}
+.bld-palette-head,
+.bld-insp-head {
+  padding: 12px 14px 6px;
+  color: var(--fg-1);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.bld-palette-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 14px;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  background: transparent;
+  color: var(--fg-1);
+  text-align: left;
+  cursor: grab;
+}
+.bld-palette-item:hover {
+  background: var(--bg-2);
+}
+.bld-palette-item .t {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.bld-palette-item .h {
+  color: var(--fg-3);
+  font-size: 11.5px;
+  line-height: 15px;
+}
+.bld-palette-tip {
+  margin: 0;
+  padding: 10px 14px;
+  border-top: 1px solid var(--rule);
+  color: var(--fg-3);
+  font-size: 11.5px;
+}
+.bld-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.bld-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---------- React Flow in the app's tokens ---------- */
+
+.bld .react-flow {
+  --xy-background-color-default: var(--bg-0);
+  --xy-background-pattern-dots-color-default: var(--rule-strong);
+  --xy-edge-stroke-default: var(--fg-3);
+  --xy-connectionline-stroke-default: var(--accent);
+  --xy-controls-button-background-color-default: var(--bg-1);
+  --xy-controls-button-background-color-hover-default: var(--bg-2);
+  --xy-controls-button-color-default: var(--fg-2);
+  --xy-controls-button-border-color-default: var(--rule);
+  background: var(--bg-0);
+}
+.bld .react-flow__controls {
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+}
+.bld .react-flow__edge.selected .react-flow__edge-path {
+  stroke-width: 2.6 !important;
+}
+
+/* ---------- block cards ---------- */
+
+.bld-node {
+  width: 290px;
+  border: 1px solid color-mix(in srgb, var(--block-color) 50%, var(--rule-strong));
+  border-radius: 2px;
+  background: var(--bg-1);
+  font-size: 12px;
+}
+.bld-node[data-wide='true'] {
+  width: 320px;
+}
+.bld-node[data-selected='true'] {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.bld-node-head {
+  padding: 8px 10px 7px;
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+}
+.bld-node-name {
+  color: var(--fg-1);
+  font: 600 13px var(--ui-mono);
+}
+.bld-node-type {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 0 6px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--fg-3);
+  font-size: 11px;
+}
+.bld-node-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.bld-col.out {
+  border-left: 1px solid var(--rule);
+}
+.bld-port {
+  position: relative;
+  padding: 5px 10px 6px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.bld-port:last-child {
+  border-bottom: 0;
+}
+.bld-port.out {
+  padding: 5px 12px 6px 10px;
+}
+.bld-kind {
+  color: var(--fg-3);
+  font-size: 10.5px;
+  line-height: 13px;
+}
+.bld-port-name {
+  color: var(--fg-1);
+  font-weight: 600;
+  line-height: 16px;
+}
+.bld-tunable {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+}
+.bld-state {
+  color: var(--fg-3);
+  font-size: 11.5px;
+}
+.bld-state[data-missing='true'] {
+  color: var(--warn);
+}
+.bld-field {
+  width: 100%;
+  height: 22px;
+  margin-top: 3px;
+  padding: 0 6px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font-size: 12px;
+}
+.bld-field:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+.bld .mono {
+  font-family: var(--ui-mono);
+  font-variant-numeric: tabular-nums;
+}
+.bld .react-flow__handle.bld-handle {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--fg-2);
+  border-radius: 50%;
+  background: var(--bg-0);
+}
+.bld .react-flow__handle.bld-handle.connectingto,
+.bld .react-flow__handle.bld-handle:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.bld .react-flow__handle-left.bld-handle {
+  left: -5px;
+}
+.bld .react-flow__handle-right.bld-handle {
+  right: -5px;
+}
+
+/* ---------- code, results, inspector ---------- */
+
+.bld-code {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  color: var(--fg-1);
+  font: 12px/18px var(--ui-mono);
+}
+.bld-empty {
+  padding: 32px 20px;
+  max-width: 72ch;
+  color: var(--fg-2);
+}
+.bld-empty strong {
+  color: var(--fg-1);
+  margin-right: 4px;
+}
+.bld-results {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 4px 20px 24px;
+}
+.bld-results section {
+  padding: 14px 0 6px;
+  border-bottom: 1px solid var(--rule);
+}
+.bld-results h3 {
+  margin: 0 0 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.bld-model {
+  margin: 10px 0 0;
+  color: var(--warn);
+  font-size: 12px;
+}
+.bld-pairs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 40px;
+  max-width: 900px;
+}
+.bld-pair {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 12.5px;
+}
+.bld-pair span:first-child {
+  color: var(--fg-2);
+}
+.bld-chart {
+  height: 300px;
+  border: 1px solid var(--rule);
+}
+.bld-trades {
+  width: 100%;
+  max-width: 980px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.bld-trades th {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--fg-3);
+  font-weight: 400;
+  text-align: left;
+}
+.bld-trades td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.bld-trades .r {
+  text-align: right;
+}
+.bld-trades .neg {
+  color: var(--down);
+}
+.bld-insp {
+  padding-bottom: 16px;
+}
+.bld-insp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 14px;
+  color: var(--fg-2);
+  font-size: 12.5px;
+}
+.bld-insp-row input {
+  width: 130px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font: 12px var(--ui-mono);
+}
+.bld-insp-type {
+  margin: 6px 14px 0;
+  color: var(--fg-1);
+  font-weight: 500;
+}
+.bld-insp-help {
+  margin: 4px 14px;
+  color: var(--fg-3);
+  font-size: 12px;
+  line-height: 17px;
+  text-wrap: pretty;
+}
+.bld-ok {
+  margin: 6px 14px;
+  color: var(--up);
+}
+.bld-problems {
+  margin: 6px 0;
+  padding: 0 14px 0 30px;
+  color: var(--warn);
+  font-size: 12px;
+  line-height: 18px;
+}

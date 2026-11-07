@@ -6,6 +6,7 @@ import {
   redirect,
 } from '@tanstack/react-router'
 import { HomePage } from './routes/HomePage'
+import { parseBuilderSearch } from './builder/search'
 import { parseContextSearch } from './state/context'
 import {
   AssetV2,
@@ -140,6 +141,14 @@ const strategiesRoute = createRoute({
   ),
 })
 
+/** Strategy builder on an unsaved graph (feature 321). */
+const builderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/t/build',
+  validateSearch: parseBuilderSearch,
+  component: lazyRouteComponent(() => import('./builder/BuilderRoute'), 'BuilderRoute'),
+})
+
 const strategyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/t/$sid/$page',
@@ -236,6 +245,7 @@ const routeTree = rootRoute.addChildren([
   investRoute,
   profileRoute,
   strategiesRoute,
+  builderRoute,
   strategyRoute,
   paperAccountsRoute,
   paperRoute,

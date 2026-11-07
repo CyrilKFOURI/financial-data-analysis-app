@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import Engine, delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 
+from fda_core import blocks
 from fda_core.backtest import DEFAULT_GRIDS
 from fda_data.schema import strategies, strategy_trials
 
@@ -18,8 +19,44 @@ class StrategyError(ValueError):
     pass
 
 
+def _validate_graph(spec: dict[str, Any]) -> dict[str, Any]:
+    """A strategy-builder graph (feature 321): it must run, and its Candlestick and Portfolio
+    Simulation trade the strategy's symbol; the grid is its tunable ports."""
+    graph = spec.get("graph")
+    if not isinstance(graph, dict):
+        raise StrategyError("A graph strategy needs a graph (blocks and wires)")
+    symbol = str(spec.get("symbol") or "").strip().upper()
+    for block in graph.get("blocks", []):
+        if block.get("type") in ("Candlestick", "PortfolioSimulation"):
+            block.setdefault("params", {})["Ticker"] = symbol
+    problems = blocks.validate(graph)
+    if problems:
+        raise StrategyError("The graph cannot run: " + "; ".join(problems))
+    return {
+        "grid": blocks.tunable_grid(graph) or {},
+        "params": blocks.tunable_params(graph),
+        "graph": graph,
+    }
+
+
 def validate_spec(spec: dict[str, Any]) -> dict[str, Any]:
     template = spec.get("template")
+    if template == "graph":
+        if not str(spec.get("symbol") or "").strip():
+            raise StrategyError("A strategy needs a symbol")
+        costs = spec.get("costs") or {"fee_bps": 5.0, "slippage_bps": 5.0}
+        if float(costs.get("fee_bps", 0)) + float(costs.get("slippage_bps", 0)) <= 0:
+            raise StrategyError("Costs are always on: fees + slippage must be > 0 bp")
+        return {
+            "overlays": [],
+            "symbol": str(spec["symbol"]).upper(),
+            "template": "graph",
+            **_validate_graph(spec),
+            "short": False,
+            "costs": costs,
+            "warmup": int(spec.get("warmup", 220)),
+            "is_fraction": float(spec.get("is_fraction", 0.6)),
+        }
     if template not in TEMPLATES:
         raise StrategyError(f"Unknown template {template!r} (options: {', '.join(TEMPLATES)})")
     if not str(spec.get("symbol") or "").strip():

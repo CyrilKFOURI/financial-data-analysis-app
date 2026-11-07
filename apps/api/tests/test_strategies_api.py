@@ -85,3 +85,68 @@ def test_strategy_lab(client: TestClient) -> None:
     client.put(f"/v1/strategies/{sid}", json=SPEC | {"grid": {"fast": [5, 10], "slow": [30, 60]}})
     again = _run(client, sid, [("TR-007", {})])["TR-007"]["result"]["payload"]
     assert again["trials_total"] == 10
+
+
+def test_strategy_builder_graph(client: TestClient) -> None:
+    """Feature 321: the block catalogue, a template graph, its run, and the lab on the graph."""
+    client.post("/v1/ingest/FAKEGR")
+    catalogue = client.get("/v1/strategies/blocks").json()
+    assert {"Candlestick", "PortfolioSimulation", "BelowCrossesAbove"} <= {
+        b["type"] for b in catalogue
+    }
+    graph = client.get(
+        "/v1/strategies/blocks/templates/ema_cross", params={"symbol": "FAKEGR"}
+    ).json()
+    assert client.post("/v1/strategies/blocks/validate", json={"graph": graph}).json() == {
+        "problems": []
+    }
+    broken = {"blocks": graph["blocks"], "wires": graph["wires"][:-4]}
+    assert client.post("/v1/strategies/blocks/validate", json={"graph": broken}).json()["problems"]
+    bad = client.post(
+        "/v1/strategies",
+        json={
+            "name": "Broken",
+            "hypothesis": HYPOTHESIS,
+            "spec": {"symbol": "FAKEGR", "template": "graph", "graph": broken},
+        },
+    )
+    assert bad.status_code == 422
+    sid = client.post(
+        "/v1/strategies",
+        json={
+            "name": "EMA Cross",
+            "hypothesis": HYPOTHESIS,
+            "spec": {"symbol": "FAKEGR", "template": "graph", "graph": graph},
+        },
+    ).json()["id"]
+    spec = client.get(f"/v1/strategies/{sid}").json()["spec"]
+    assert spec["grid"] == {
+        "ema_fast.Period": [8.0, 12.0, 16.0],
+        "ema_slow.Period": [21.0, 26.0, 34.0],
+    }
+    out = _run(client, sid, [("TR-027", {}), ("TR-001", {}), ("TR-024", {})])
+    failed = {k: v["error"]["detail"] for k, v in out.items() if "error" in v}
+    assert not failed, failed
+    summary = out["TR-027"]["result"]["payload"]["performance_summary"]
+    assert summary["total_trades"] == summary["winning_trades"] + summary["losing_trades"]
+    assert out["TR-001"]["result"]["payload"]["validation"]["trials_total"] == 9
+
+
+def test_graph_preview_runs_an_unsaved_graph_on_an_asset(client: TestClient) -> None:
+    client.post("/v1/ingest/FAKEGP")
+    graph = client.get(
+        "/v1/strategies/blocks/templates/rsi_bounce", params={"symbol": "FAKEGP"}
+    ).json()
+    response = client.post(
+        "/v1/analyses:run",
+        json={
+            "subject": {"type": "asset", "id": "FAKEGP"},
+            "context": {"range": "MAX"},
+            "analyses": [{"id": "TR-028", "params": {"graph": graph}}],
+        },
+    )
+    line = json.loads(response.text.splitlines()[0])
+    assert "result" in line, line
+    payload = line["result"]["payload"]
+    assert payload["run_configuration"]["blocks"] == 9
+    assert len(payload["dates"]) == len(payload["lines"]["equity"])

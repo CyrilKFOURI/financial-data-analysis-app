@@ -7,7 +7,7 @@ traded notional) are always on; every configuration run counts as a trial for DS
 
 import itertools
 import math
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from scipy import linalg, stats
 
-from fda_core import carver
+from fda_core import blocks, carver
 from fda_core.registry import InsufficientDataError
 
 Template = Literal[
@@ -35,6 +35,7 @@ Template = Literal[
     "donchian_ensemble",
     "tema_events",
     "kalman_trend",
+    "graph",
 ]
 
 # Default grids (the library's reference configuration space, TR-010).
@@ -176,9 +177,19 @@ def rsi(close: pd.Series, period: int) -> pd.Series:
 
 
 def signal(
-    template: Template, close: pd.Series, params: dict[str, float], short: bool = False
+    template: Template,
+    close: pd.Series,
+    params: dict[str, float],
+    short: bool = False,
+    graph: Mapping[str, Any] | None = None,
 ) -> pd.Series:
-    """Target position on each bar's close (before the one-bar shift): 1 long, −1 short, 0 flat."""
+    """Target position on each bar's close (before the one-bar shift): 1 long, −1 short, 0 flat.
+    Template `graph`: a strategy-builder graph (feature 321), its tunable parameters in
+    `params` as "block.Port"; the target is 1 while its Portfolio Simulation holds a position."""
+    if template == "graph":
+        if graph is None:
+            raise InsufficientDataError("A graph strategy needs its graph")
+        return blocks.graph_position(blocks.apply_params(graph, params), close)
     p = {k: int(v) if float(v).is_integer() else v for k, v in params.items()}
     if template == "ema_cross":
         raw = np.sign(ema(close, int(p["fast"])) - ema(close, int(p["slow"])))
@@ -683,11 +694,14 @@ def grid_returns(
     warmup: int,
     short: bool = False,
     overlays: list[str] | None = None,
+    graph: Mapping[str, Any] | None = None,
 ) -> pd.DataFrame:
     """Trial matrix: one column of net returns per configuration (the input of DSR and PBO)."""
     cols = {}
     for i, params in enumerate(grid):
-        target = apply_overlays(signal(template, close, params, short), close, overlays or [])
+        target = apply_overlays(
+            signal(template, close, params, short, graph), close, overlays or []
+        )
         cols[i] = run_vectorised(close, target, costs, warmup)["net"]
     return pd.DataFrame(cols)
 

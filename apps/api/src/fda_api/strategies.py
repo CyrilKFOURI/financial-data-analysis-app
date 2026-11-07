@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import Engine
 
+from fda_core import blocks
 from fda_data.strategies import (
     TEMPLATES,
     StrategyError,
@@ -33,6 +34,31 @@ class StrategyBody(BaseModel):
 @router.get("/templates")
 def get_templates() -> dict[str, dict[str, list[float]]]:
     return TEMPLATES
+
+
+@router.get("/blocks")
+def get_blocks() -> list[dict[str, Any]]:
+    """The strategy builder's block catalogue (feature 321): ports, types, defaults."""
+    return blocks.catalogue()
+
+
+@router.get("/blocks/templates/{name}")
+def get_graph_template(name: str, symbol: str = "SPY") -> dict[str, Any]:
+    """A starting graph: `ema_cross`, `rsi_bounce` (the Edgebot clone's) or `blank`."""
+    try:
+        return blocks.template(name, symbol.upper())
+    except blocks.GraphError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+class GraphBody(BaseModel):
+    graph: dict[str, Any]
+
+
+@router.post("/blocks/validate")
+def post_validate(body: GraphBody) -> dict[str, list[str]]:
+    """Every problem of a graph in words; empty when it can run."""
+    return {"problems": blocks.validate(body.graph)}
 
 
 @router.get("")

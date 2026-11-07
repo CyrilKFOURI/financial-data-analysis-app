@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import { getStrategy } from '../api/client'
+import { Builder } from '../builder/Builder'
 import { clearLayout, layoutStorageKey } from '../workspace/layout-storage'
 import { STRATEGY_PAGES, findStrategyPage } from '../workspace/pages'
 import { Workspace } from '../workspace/Workspace'
@@ -10,6 +11,12 @@ import { TAB_ACTION, TAB_ACTIVE, TAB_CLASS } from '../shell/pageTabsStyles'
 
 /** Strategy workspace `/t/$sid/$page` (M25): validation, results, risk & synthetic. */
 export function StrategyPage() {
+  const { sid, page } = useParams({ from: '/t/$sid/$page' })
+  // a strategy built from blocks opens its graph (feature 321)
+  return page === 'build' ? <Builder strategyId={Number(sid)} /> : <StrategyWorkspace />
+}
+
+function StrategyWorkspace() {
   const { sid, page } = useParams({ from: '/t/$sid/$page' })
   const [layoutVersion, setLayoutVersion] = useState(0)
   const current = findStrategyPage(page)

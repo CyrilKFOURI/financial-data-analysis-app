@@ -1763,6 +1763,20 @@
     "section": "V5 — Trading (decide & act)",
     "source": "QT bootcamp 2, owner's review (diversify across assets)"
   },
+  "TR-027": {
+    "id": "TR-027",
+    "name": "Strategy graph run",
+    "definition": "A saved strategy-builder graph (template `graph`) on the strategy's daily bars: blocks in topological order (Candlestick = adjusted OHLCV; EMA α = 2/(n+1), adjust=False, empty until n bars; RSI on simple averages of gains and losses (the owner's notebook); Rolling Aggregate Min/Max/Mean/Sum over K bars; Previous K; comparison with a constant, false where empty; Logical And; Below Crosses Above = from ≤ to >), then the Portfolio Simulation: long-only, entries and exits filled at the close of the signal bar ± slippage, stop when the close ≤ the previous bar's stop level − StopGap, take profit at entry + RiskRewardRatio × initial risk, entries skipped when the risk distance exceeds MaxRiskDistance, size = Units or PercentOfEquity × equity × leverage / price, FeesPerUnit × units per fill, no trading once equity < MinEquityThreshold. Results: run configuration, performance summary (trades, win rate, realized P&L, fees, max drawdown and its duration in bars, profit factor, max consecutive losses, Sharpe of daily equity returns annualised by bars per year, skewness, excess kurtosis, final equity), equity curve, markers, trades",
+    "section": "V5 — Trading (decide & act)",
+    "source": "owner's Edgebot clone (feature 321)"
+  },
+  "TR-028": {
+    "id": "TR-028",
+    "name": "Strategy graph preview",
+    "definition": "TR-027 on the graph currently on the canvas (a parameter), saved or not, on an asset's daily bars",
+    "section": "V5 — Trading (decide & act)",
+    "source": "feature 321"
+  },
   "TR-010": {
     "id": "TR-010",
     "name": "Strategy library",

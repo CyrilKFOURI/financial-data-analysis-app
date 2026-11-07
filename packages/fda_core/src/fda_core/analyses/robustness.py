@@ -71,7 +71,9 @@ def _without_overlay(
     spec: dict[str, Any], close: pd.Series, params: dict[str, float], overlay: str
 ) -> pd.Series:
     kept = [o for o in spec.get("overlays") or [] if o != overlay]
-    return bt.apply_overlays(bt.signal(spec["template"], close, params, spec["short"]), close, kept)
+    return bt.apply_overlays(
+        bt.signal(spec["template"], close, params, spec["short"], spec.get("graph")), close, kept
+    )
 
 
 def ablation_targets(

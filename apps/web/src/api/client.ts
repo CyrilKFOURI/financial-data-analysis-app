@@ -652,6 +652,7 @@ export type StrategyRow = {
     template: string
     params: Record<string, number>
     grid: Record<string, number[]>
+    graph?: StrategyGraph
   }
   trials?: number
 }
@@ -668,6 +669,51 @@ export const createStrategy = (body: {
   hypothesis: string
   spec: Record<string, unknown>
 }) => send<{ id: number }>('/v1/strategies', json(body))
+export const updateStrategySpec = (id: number, spec: Record<string, unknown>) =>
+  send<StrategyRow>(`/v1/strategies/${id}`, { ...json(spec), method: 'PUT' })
+
+// ── 321 strategy builder (block graphs) ─────────────────────────────────────
+
+export type PortKind = 'Timeseries' | 'Real' | 'Integer' | 'Category'
+export type PortSchema = {
+  name: string
+  kind: PortKind
+  default: unknown
+  choices: string[]
+  required: boolean
+  help: string
+}
+export type BlockSchema = {
+  type: string
+  title: string
+  help: string
+  inputs: PortSchema[]
+  outputs: PortSchema[]
+}
+export type GraphBlock = {
+  id: string
+  type: string
+  x: number
+  y: number
+  params: Record<string, unknown>
+  tunable?: Record<string, number[]>
+}
+export type GraphWire = { from: [string, string]; to: [string, string] }
+export type StrategyGraph = { blocks: GraphBlock[]; wires: GraphWire[] }
+
+export const getBlockCatalogue = async (): Promise<BlockSchema[]> =>
+  (await request('/v1/strategies/blocks')).json() as Promise<BlockSchema[]>
+export const getGraphTemplate = async (name: string, symbol: string): Promise<StrategyGraph> =>
+  (
+    await request(
+      `/v1/strategies/blocks/templates/${encodeURIComponent(name)}?symbol=${encodeURIComponent(symbol)}`,
+    )
+  ).json() as Promise<StrategyGraph>
+export const validateGraph = (graph: StrategyGraph) =>
+  send<{ problems: string[] }>('/v1/strategies/blocks/validate', {
+    method: 'POST',
+    ...json({ graph }),
+  })
 
 // ── M29 paper trading ────────────────────────────────────────────────────────
 

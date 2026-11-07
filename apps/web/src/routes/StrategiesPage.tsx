@@ -102,6 +102,31 @@ export function StrategiesPage() {
         </table>
       </section>
       <section className="flex max-w-3xl flex-col gap-2 border-t border-rule pt-3">
+        <h2 className="micro-label">Build with blocks</h2>
+        <p className="text-fg-2">
+          Wire data, indicators, signals and a portfolio simulation on a canvas, run it, then
+          validate it here like any strategy.
+        </p>
+        <div className="flex flex-wrap gap-2" data-testid="builder-templates">
+          {(
+            [
+              ['ema_cross', 'EMA Cross'],
+              ['rsi_bounce', 'RSI Bounce'],
+              ['blank', 'Blank canvas'],
+            ] as const
+          ).map(([template, label]) => (
+            <Link
+              key={template}
+              to="/t/build"
+              search={(previous) => ({ ...previous, template, symbol: 'QQQ' })}
+              className="border border-rule px-2 py-1 text-fg-1 hover:bg-bg-2"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </section>
+      <section className="flex max-w-3xl flex-col gap-2 border-t border-rule pt-3">
         <h2 className="micro-label">New strategy</h2>
         <input
           className={`${input} w-64`}

@@ -97,3 +97,18 @@ test('v2: no shadows, no rounded corners above 2 px outside floating menus', asy
   )
   expect(offenders).toBe(0)
 })
+
+test('strategy builder: a template graph loads, validates and runs on the canvas', async ({
+  page,
+}) => {
+  await ingest(page, 'FAKEBLD')
+  await page.goto('/t/build?template=rsi_bounce&symbol=FAKEBLD&ui=v2')
+  // the clone's RSI Bounce graph: nine blocks, the portfolio last
+  await expect(page.locator('.bld-node')).toHaveCount(9, { timeout: 30_000 })
+  await expect(page.locator('.bld-status')).toHaveText('Ready to run', { timeout: 30_000 })
+  await page.getByRole('tab', { name: 'Code' }).click()
+  await expect(page.getByLabel('Graph as JSON')).toContainText('"PortfolioSimulation"')
+  await page.getByRole('button', { name: /Run/ }).click()
+  await expect(page.locator('.bld-results')).toContainText('Total trades', { timeout: 60_000 })
+  await expect(page.locator('.bld-results')).toContainText('Final equity')
+})
