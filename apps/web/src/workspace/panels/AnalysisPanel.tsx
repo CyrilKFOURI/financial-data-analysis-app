@@ -59,7 +59,7 @@ const isNumberArray = (value: unknown): value is (number | null)[] =>
 
 /** Abbreviations kept in capitals when keys become labels. */
 const ACRONYMS = new Set(
-  'twr mwr ytd mtd hhi es cagr capm ath pnl iqr mae mfe sqn psr dsr pbo cdar ewma garch adx rsi macd atr obv fx etf usd eur gbp chf jpy id ic ir ols wls ar ma ff3 ff5 dcf wacc eps pe ev ebit ebitda roe roa roic fcf dd nav nw r2 hy ig cpi gdp'.split(
+  'twr mwr ytd mtd hhi es cagr capm ath pnl iqr mae mfe sqn psr dsr pbo cdar ewma garch adx rsi macd atr obv fx etf usd eur gbp chf jpy id ic ir ols wls ar ma ff3 ff5 dcf wacc eps pe ev ebit ebitda roe roa roic fcf dd nav nw r2 hy ig cpi gdp se letf cfd'.split(
     ' ',
   ),
 )
@@ -74,6 +74,7 @@ const PROPER = new Set(
 const word = (w: string) => {
   const lower = w.toLowerCase()
   if (lower === 'oos') return 'OOS'
+  if (/^(ma|sma|ema)\d+$/.test(lower)) return lower.toUpperCase()
   if (PROPER.has(lower)) return lower.charAt(0).toUpperCase() + lower.slice(1)
   const value = /^(c?)var(\d*)$/.exec(lower)
   if (value) return `${value[1] ? 'C' : ''}VaR${value[2]}`

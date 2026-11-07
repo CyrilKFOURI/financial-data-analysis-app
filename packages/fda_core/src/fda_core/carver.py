@@ -14,6 +14,7 @@ any position, the position buffer.
 """
 
 import math
+from collections.abc import Callable, Sequence
 
 import numpy as np
 import pandas as pd
@@ -124,8 +125,10 @@ def forecasts(close: pd.Series, periods: float | None = None) -> tuple[pd.DataFr
     return f, v
 
 
-def weights() -> np.ndarray:
-    w = np.array([RULE_WEIGHTS[k] for k in RULE_WEIGHTS], dtype=float)
+def weights(rules: Sequence[str] | None = None) -> np.ndarray:
+    """Rule weights normalised to 1 (over `rules`, in their order; all rules by default)."""
+    names = list(RULE_WEIGHTS) if rules is None else list(rules)
+    w = np.array([RULE_WEIGHTS[k] for k in names], dtype=float)
     out: np.ndarray = w / w.sum()
     return out
 
@@ -141,7 +144,9 @@ def fdm_from_corr(w: np.ndarray, corr: np.ndarray) -> float:
 def fdm_path(f: pd.DataFrame) -> pd.Series:
     """Point-in-time FDM: re-estimated every month on all forecasts up to that bar (expanding),
     1 until a year of forecasts exists — never uses a later forecast."""
-    w = weights()
+    w = weights(list(f.columns))
+    if len(w) == 1:  # one rule: nothing to diversify
+        return pd.Series(1.0, index=f.index)
     values = f.to_numpy()
     out = np.ones(len(f))
     current = 1.0
@@ -158,7 +163,7 @@ def fdm_path(f: pd.DataFrame) -> pd.Series:
 def combined(f: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
     """Weighted forecast × point-in-time FDM, capped ±20; returns (forecast, FDM path)."""
     fdm = fdm_path(f)
-    raw = f.mul(weights(), axis=1).sum(axis=1, min_count=f.shape[1])
+    raw = f.mul(weights(list(f.columns)), axis=1).sum(axis=1, min_count=f.shape[1])
     return (raw * fdm).clip(-FC_CAP, FC_CAP), fdm
 
 
@@ -177,10 +182,17 @@ def apply_buffer(target: pd.Series, base: pd.Series, frac: float) -> pd.Series:
 
 
 def position(
-    close: pd.Series, vol_target: float = 0.20, buffer: float = 0.10, long_only: bool = True
+    close: pd.Series,
+    vol_target: float = 0.20,
+    buffer: float = 0.10,
+    long_only: bool = True,
+    rules: Sequence[str] | None = None,
 ) -> pd.Series:
-    """Target weight on each close (the backtest engine shifts it one bar)."""
+    """Target weight on each close (the backtest engine shifts it one bar). `rules` keeps a
+    subset of the four rules, weights renormalised (ablation, TR-024); all rules by default."""
     f, v = forecasts(close)
+    if rules is not None:
+        f = f[list(rules)]
     fc, _ = combined(f)
     scale = (vol_target / v["vol"]).replace([np.inf, -np.inf], np.nan)
     w = (fc / FC_TARGET * scale).fillna(0.0).clip(0.0 if long_only else -1.0, 1.0)
@@ -259,3 +271,66 @@ def prop_challenge(
             }
         )
     return rows
+
+
+# ── multi-asset book with IDM (TR-026) ───────────────────────────────────────
+
+IDM_MAX = 2.5
+
+
+def idm_path(sub: pd.DataFrame, w: np.ndarray) -> pd.Series:
+    """Point-in-time instrument diversification multiplier, 1 / √(w'Hw) on the correlations of
+    the instruments' sub-system returns (negatives floored at 0, cap 2.5): re-estimated every
+    month on all returns up to that bar, 1 until a year of returns exists."""
+    values = sub.to_numpy()
+    out = np.ones(len(sub))
+    current = 1.0
+    live = (values != 0).any(axis=1)
+    seen = np.cumsum(live)
+    for i in range(len(sub)):
+        if seen[i] >= FDM_MIN_OBS and (i % FDM_EVERY == 0):
+            past = values[: i + 1][live[: i + 1]]
+            current = min(IDM_MAX, fdm_from_corr(w, np.corrcoef(past, rowvar=False)))
+        out[i] = current
+    return pd.Series(out, index=sub.index)
+
+
+def book_positions(
+    returns: pd.DataFrame,
+    weights: np.ndarray,
+    per_asset: Callable[[pd.Series], pd.Series],
+    max_leverage: float,
+) -> tuple[pd.DataFrame, pd.Series]:
+    """Each instrument sized on its own (`per_asset` on its total-return index), then
+    position_i = IDM · w_i · p_i, decided at the close; the gross exposure is scaled down to
+    `max_leverage` when above it. Returns (positions, IDM path)."""
+    own = pd.DataFrame(
+        {c: per_asset((1 + returns[c].fillna(0.0)).cumprod()) for c in returns.columns}
+    )
+    sub = own.shift(1).fillna(0.0) * returns.fillna(0.0)
+    idm = idm_path(sub, weights)
+    raw = own.mul(weights, axis=1).mul(idm, axis=0)
+    gross = raw.abs().sum(axis=1)
+    scale = (max_leverage / gross).where(gross > max_leverage, 1.0)
+    return raw.mul(scale, axis=0), idm
+
+
+def run_book(
+    returns: pd.DataFrame, positions: pd.DataFrame, cost_per_unit: float, warmup: int
+) -> pd.DataFrame:
+    """net_t = Σ_i p_{i,t−1}·r_{i,t} − cost · Σ_i |p_{i,t−1} − p_{i,t−2}| (one-bar shift, costs
+    on traded notional, the warm-up excluded): the vectorised engine for a book."""
+    held = positions.shift(1).fillna(0.0)
+    held.iloc[:warmup] = 0.0
+    traded = held.diff().abs().fillna(held.abs()).sum(axis=1)
+    gross = (held * returns.fillna(0.0)).sum(axis=1)
+    frame = pd.DataFrame(
+        {
+            "position": held.abs().sum(axis=1),
+            "gross": gross,
+            "cost": traded * cost_per_unit,
+            "net": gross - traded * cost_per_unit,
+            "asset": returns.fillna(0.0).mean(axis=1),
+        }
+    )
+    return frame.iloc[warmup:]

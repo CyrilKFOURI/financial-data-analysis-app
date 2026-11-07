@@ -50,7 +50,9 @@ def test_scalars_and_containers_roundtrip() -> None:
     }
     back = roundtrip(value)
     assert isinstance(back, dict)
-    assert back["d"] == value["d"] and back["dt"] == value["dt"] and back["td"] == value["td"]
-    assert back["ts"] == value["ts"] and back["nat"] is pd.NaT
-    assert back["tuple"] == (1, "a") and back["set"] == {3}
+    for key in ("d", "dt", "td", "ts"):
+        assert back[key] == value[key]
+    assert back["nat"] is pd.NaT
+    assert back["tuple"] == (1, "a")
+    assert back["set"] == {3}
     assert back["nested"] == [{"x": 1.5}]

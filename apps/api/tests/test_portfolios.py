@@ -97,6 +97,7 @@ def test_portfolio_subject_runs_portfolio_and_price_analyses(client: TestClient)
         "R-001",
         "R-020",
         "TS-001",
+        "TR-026",
     ]
     out = _run(client, str(pid), ids)
     failed = {k: v["error"]["detail"] for k, v in out.items() if "error" in v}
@@ -104,6 +105,13 @@ def test_portfolio_subject_runs_portfolio_and_price_analyses(client: TestClient)
     d = out["P-009"]["result"]["payload"]
     assert abs(sum(r["risk_contribution"] for r in d["rows"]) - d["volatility"]) < 1e-9
     assert out["P-003"]["result"]["analysis_id"] == "P-003"
+    book = out["TR-026"]["result"]["payload"]
+    assert [r["series"] for r in book["rows"]] == [
+        "carver_book",
+        "vol_targeted_hold",
+        "buy_and_hold",
+    ]
+    assert [w["symbol"] for w in book["weights"]] == ["FAKE", "FAKEB"]  # cash is not traded
     # What-if draft analysed side by side: a different subject, a different result.
     client.put(
         f"/v1/portfolios/{pid}", json={"holdings": [{"symbol": "FAKE", "weight": 1}], "draft": True}

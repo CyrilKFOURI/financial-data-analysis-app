@@ -1738,14 +1738,35 @@
   "TR-019": {
     "id": "TR-019",
     "name": "Prop-firm challenge Monte Carlo",
-    "definition": "Two phases (+10 %, +5 %), daily loss 5 %, total loss 10 % of the initial capital, ≥ 4 days, 250-day horizon per phase; OOS daily net returns block-bootstrapped (20 d), rescaled to each vol target; P(funded), P(fail in phase 1), median days. Close-to-close (optimistic vs intraday checks)",
+    "definition": "Two phases (+10 %, +5 %), daily loss 5 %, total loss 10 % of the initial capital, ≥ 4 days, 250-day horizon per phase; OOS daily net returns block-bootstrapped (20 d), rescaled to each vol target; P(funded), P(fail in phase 1), median days. Close-to-close (optimistic vs intraday checks). v1.1.0 CFD costs: spread (bp) on each change of position, swap per calendar night held (annual rate, long/short; the triple-swap day only moves the charge within the week), no exchange fees",
     "section": "V5 — Trading (decide & act)",
     "source": "QT bootcamp 2 (video 32/35)"
+  },
+  "TR-024": {
+    "id": "TR-024",
+    "name": "Robustness protocol",
+    "definition": "Quant Rick's corrected protocol on a strategy. Plateau selection on in-sample Sharpe only: score = median IS Sharpe of the cell and its grid neighbours (one step per axis); eligible = ≥ 2 round trips a year and off the grid's edge when an inner cell exists; pick = best score (ties → own IS Sharpe); OOS Sharpe shown read-only. Execution delay: chosen parameters at close t+1, t+2, t+3 and the adjusted open of t+1 (open-to-open returns, two-bar shift). Two epochs fixed in advance (`epoch_split`, default the middle of the post-warm-up sample), each against buy & hold, the vol-targeted buy & hold (TR-018) and the MA200 filter: Sharpe ± √((1+SR²/2)/T), CAGR, MaxDD; epoch < 1 year → null + reason. Ablation: each Carver rule (weights renormalised), the buffer and each overlay switched off; a layer earns its place when removing it lowers the Sharpe in both epochs. Checks pass/warn/n-a: plateau, trades a year (n/a for continuous sizing, turnover shown), delay (Sharpe at t+2 ≥ ½ Sharpe at t+1), both epochs beat the vol-targeted hold, layers. v1.1.0 option `letf_baseline`: 50/50 of the index bought and held and a simulated daily-reset ×3 ETF (r₃ = 3r − (fee + 2·financing)/periods, fee 0.88 %, financing 4 % by default) held above its own 200-day average, rebalanced daily; check = beats it on Calmar in both epochs. Annualisation from the series' bars per year",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT protocol §6, owner's review"
+  },
+  "TR-025": {
+    "id": "TR-025",
+    "name": "Signal ensembles & shadow test",
+    "definition": "Members = the k best in-sample cells of the strategy's grid (k = 5 by default). Combined by OR (any long), AND (all long), majority vote (> ½ long) and mean (average position). Shadow test (Boruta-style): the series' own position path rotated in time by a random offset (≥ 63 bars from both ends), n = 200, seed 1, same costs; p = (1 + #shadows with Sharpe ≥ actual)/(n + 1) on in-sample bars; beats its shadows at p ≤ 0.05. OOS Sharpe and MaxDD shown read-only",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT bootcamp 1 (ensembles, Boruta)"
+  },
+  "TR-026": {
+    "id": "TR-026",
+    "name": "Multi-asset Carver book",
+    "definition": "Subject portfolio: its non-cash holdings are the instruments, its weights (renormalised) the instrument weights. Each instrument sized by TR-018 on its base-currency total-return index at the book's vol target (default 20 %, buffer 10 %). Position_i = IDM · w_i · p_i; IDM = 1/√(w'Hw) on the correlations of sub-system returns p_(i,t−1)·r_(i,t), negatives floored at 0, cap 2.5, point-in-time (expanding, monthly, ≥ 252 obs); gross exposure capped (default 2). Engine: one-bar shift, costs = portfolio cost_bps on traded notional, warm-up 261. Compared with the basket bought and held (static weights) and the basket sized by vol without trend (same IDM method): Sharpe ± SE, CAGR, vol, MaxDD, exposure, two epochs, crisis windows; per-instrument sub-system Sharpe. No parameter fitted",
+    "section": "V5 — Trading (decide & act)",
+    "source": "QT bootcamp 2, owner's review (diversify across assets)"
   },
   "TR-010": {
     "id": "TR-010",
     "name": "Strategy library",
-    "definition": "Trend (MA/triple-EMA/TEMA cross, Donchian, SuperTrend), momentum (TS & cross-sectional 12-1), mean reversion (RSI/Bollinger/z-score), pairs (from Q-003), carry (FX/curve), factor long/short (from SC-004), volatility targeting overlay",
+    "definition": "Trend (MA/triple-EMA/TEMA cross, Donchian, SuperTrend, MACD-V = (EMA fast − EMA slow)/ATR slow × 100 with close-to-close ATR, long above its 9-bar signal and a threshold; Donchian ensemble = share of channels N = shortest·2^k that are long, each entering above its prior N-day high and exiting below the channel middle — v1.2.0), momentum (TS & cross-sectional 12-1), mean reversion (RSI/Bollinger/z-score), pairs (from Q-003), carry (FX/curve), factor long/short (from SC-004), volatility targeting overlay",
     "section": "V5 — Trading (decide & act)",
     "source": "QT, CB, QP-L37/L42"
   },

@@ -59,6 +59,8 @@ def test_strategy_lab(client: TestClient) -> None:
         "TR-016",
         "TR-017",
         "TR-004",
+        "TR-024",
+        "TR-025",
     ]
     out = _run(client, sid, [(i, {}) for i in ids])
     for aid in ids:
@@ -70,6 +72,13 @@ def test_strategy_lab(client: TestClient) -> None:
     assert run["lines"]["strategy"]
     assert out["TR-014"]["result"]["payload"]["paths"] == 5
     assert len(out["TR-008"]["result"]["payload"]["rows"]) == 7
+    robust = out["TR-024"]["result"]["payload"]
+    assert [c["check"] for c in robust["checks"]][:3] == [
+        "Plateau",
+        "Trades a year",
+        "Execution delay",
+    ]
+    assert {r["series"] for r in robust["epochs"]} >= {"strategy", "vol_targeted_hold"}
     # Same spec again: no new trials; a new grid adds its configurations to the ledger.
     _run(client, sid, [("TR-007", {})])
     assert client.get(f"/v1/strategies/{sid}").json()["trials"] == 6

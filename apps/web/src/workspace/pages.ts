@@ -198,6 +198,12 @@ const PORTFOLIO_PLAN_PAGE = {
     plan('in-risk-budget', 'Risk budgets', 'IN-023', {}, 'in-rebalancing'),
     DCA,
     KELLY,
+    plan('tr-carver-book', 'Carver multi-asset book', 'TR-026', {
+      toggles: [
+        { param: 'vol_target', label: 'Vol target', options: ['0.2', '0.12', '0.16', '0.25'] },
+      ],
+      lines: ['lines.carver_book', 'lines.buy_and_hold'],
+    }),
   ],
 } satisfies AssetPage
 
@@ -1138,6 +1144,10 @@ export const STRATEGY_PAGES: AssetPage[] = [
       tr('tr-protocols', 'IS/OOS, walk-forward vs backward', 'TR-003', {}, 'tr-overfitting'),
       tr('tr-pbo', 'CSCV & PBO', 'TR-009', {}, 'tr-overfitting'),
       tr('tr-cpcv', 'CPCV paths', 'TR-014', {}, 'tr-sins'),
+      tr('tr-robustness', 'Robustness protocol', 'TR-024', {
+        toggles: [{ param: 'letf_baseline', label: 'Leveraged baseline', options: ['off', 'on'] }],
+        textParam: { param: 'epoch_split', label: 'Epoch split', placeholder: 'YYYY-MM-DD' },
+      }),
     ],
   },
   {
@@ -1149,6 +1159,9 @@ export const STRATEGY_PAGES: AssetPage[] = [
       }),
       tr('tr-grid', 'Grid & sensitivity', 'TR-002'),
       tr('tr-stats', 'Statistics & trades', 'TR-016', {}, 'tr-grid'),
+      tr('tr-ensembles', 'Ensembles & shadow test', 'TR-025', {
+        toggles: [{ param: 'members', label: 'Members', options: ['5', '3', '8'] }],
+      }),
     ],
   },
   {
@@ -1163,7 +1176,22 @@ export const STRATEGY_PAGES: AssetPage[] = [
       tr('tr-strategy-risk', 'Strategy risk', 'TR-017'),
       tr('tr-synthetic', 'Synthetic OU rules', 'TR-015'),
       tr('tr-event', 'Event-driven run', 'TR-004', {}, 'tr-strategy-risk'),
-      tr('tr-prop', 'Prop-firm challenge', 'TR-019', {}, 'tr-synthetic'),
+      tr(
+        'tr-prop',
+        'Prop-firm challenge',
+        'TR-019',
+        {
+          toggles: [
+            { param: 'cfd_spread_bps', label: 'CFD spread bp', options: ['0', '1', '2', '5'] },
+            {
+              param: 'cfd_swap_long',
+              label: 'Swap long /yr',
+              options: ['0', '0.064', '0.078', '0.304'],
+            },
+          ],
+        },
+        'tr-synthetic',
+      ),
     ],
   },
 ]

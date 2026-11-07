@@ -31,6 +31,8 @@ Template = Literal[
     "supertrend",
     "short_term_reversal",
     "carver_trend",
+    "macd_v",
+    "donchian_ensemble",
 ]
 
 # Default grids (the library's reference configuration space, TR-010).
@@ -47,6 +49,8 @@ DEFAULT_GRIDS: dict[str, dict[str, list[float]]] = {
     "zscore_reversion": {"window": [20, 60, 120], "entry": [1.5, 2.0, 2.5]},
     "short_term_reversal": {"lookback": [3, 5, 10], "threshold": [0.02, 0.04]},
     "carver_trend": {"vol_target": [0.12, 0.16, 0.2], "buffer": [0.0, 0.1]},
+    "macd_v": {"fast": [8, 12], "slow": [21, 26], "threshold": [0, 50]},
+    "donchian_ensemble": {"shortest": [10, 20, 40], "levels": [3, 4]},
 }
 
 # Library documentation (TR-010): family, rules and known failure regimes.
@@ -113,6 +117,22 @@ TEMPLATE_DOCS: dict[str, dict[str, str]] = {
             "FDM; weight = F/10 · vol target / σ, long-only, capped at 1, 10 % buffer"
         ),
         "fails": "V-shaped rebounds on a rising asset (lags a vol-targeted buy & hold)",
+    },
+    "macd_v": {
+        "family": "trend",
+        "rules": (
+            "MACD-V = (EMA fast − EMA slow) / ATR slow × 100 (close-to-close ATR); long while "
+            "MACD-V is above its 9-bar signal and above the threshold"
+        ),
+        "fails": "Low-volatility drifts, where the ATR scaling inflates small crosses",
+    },
+    "donchian_ensemble": {
+        "family": "trend",
+        "rules": (
+            "Average of Donchian channels N = shortest × 2^k (k < levels): each enters above "
+            "its prior N-day high and exits below the channel's middle; position = share long"
+        ),
+        "fails": "Range-bound markets after a long trend (every channel exits late)",
     },
 }
 
@@ -190,6 +210,10 @@ def signal(
         return carver.position(
             close, float(p.get("vol_target", 0.2)), float(p.get("buffer", 0.1)), not short
         )
+    elif template == "macd_v":
+        return _macd_v(close, int(p["fast"]), int(p["slow"]), float(p.get("threshold", 0.0)))
+    elif template == "donchian_ensemble":
+        return _donchian_ensemble(close, int(p["shortest"]), int(p["levels"]))
     elif template == "short_term_reversal":
         n, threshold = int(p.get("lookback", 5)), float(p.get("threshold", 0.03))
         drop = (close / close.shift(n) - 1) < -threshold
@@ -204,6 +228,49 @@ def _tema(x: pd.Series, n: int) -> pd.Series:
     e1 = ema(x, n)
     e2 = ema(e1, n)
     return 3 * e1 - 3 * e2 + ema(e2, n)
+
+
+def macd_v(close: pd.Series, fast: int, slow: int) -> pd.Series:
+    """MACD-V (Spiroglou): MACD in units of volatility, (EMA fast − EMA slow) / ATR slow × 100.
+    The ATR is close-to-close (Wilder smoothing of |Δclose|), like the supertrend template."""
+    atr = close.diff().abs().ewm(alpha=1 / slow, adjust=False, min_periods=slow).mean()
+    return (ema(close, fast) - ema(close, slow)) / atr * 100
+
+
+MAX_DONCHIAN_LEVELS = 6
+
+
+def _macd_v(close: pd.Series, fast: int, slow: int, threshold: float) -> pd.Series:
+    if not 2 <= fast < slow <= len(close):
+        raise InsufficientDataError("macd_v needs 2 ≤ fast < slow ≤ the number of bars")
+    value = macd_v(close, fast, slow)
+    sig = value.ewm(span=9, adjust=False).mean()
+    return ((value > sig) & (value > threshold)).astype(float)
+
+
+def _donchian_ensemble(close: pd.Series, shortest: int, levels: int) -> pd.Series:
+    """Share of the channels N = shortest·2^k that are long. Each channel enters above its prior
+    N-day high and exits below the middle of its prior N-day range (long-only). Parameters come
+    from user grids, so they are bounded: shortest ≥ 2, 1 ≤ levels ≤ 6, longest ≤ the series."""
+    if shortest < 2 or not 1 <= levels <= MAX_DONCHIAN_LEVELS:
+        raise InsufficientDataError(
+            f"donchian_ensemble needs shortest ≥ 2 and 1 ≤ levels ≤ {MAX_DONCHIAN_LEVELS}"
+        )
+    if shortest * 2 ** (levels - 1) > len(close):
+        raise InsufficientDataError(
+            f"The longest channel ({shortest * 2 ** (levels - 1)} bars) exceeds the series"
+        )
+    states = []
+    for k in range(levels):
+        n = shortest * 2**k
+        high = close.rolling(n).max().shift(1)
+        low = close.rolling(n).min().shift(1)
+        mid = (high + low) / 2
+        state = pd.Series(
+            np.where(close > high, 1.0, np.where(close < mid, 0.0, np.nan)), index=close.index
+        )
+        states.append(state.ffill().fillna(0.0))
+    return pd.concat(states, axis=1).mean(axis=1)
 
 
 def _supertrend(close: pd.Series, n: int, mult: float) -> pd.Series:
@@ -507,7 +574,7 @@ def grid_returns(
 
 
 def ordered_constraint(template: Template) -> Callable[[dict[str, float]], bool] | None:
-    if template in ("ema_cross", "sma_cross", "tema_cross"):
+    if template in ("ema_cross", "sma_cross", "tema_cross", "macd_v"):
         return lambda p: p["fast"] < p["slow"]
     if template == "triple_ema":
         return lambda p: p["fast"] < p["mid"] < p["slow"]

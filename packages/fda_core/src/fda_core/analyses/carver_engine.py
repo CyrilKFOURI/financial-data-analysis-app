@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from fda_core import backtest as bt
 from fda_core import carver
+from fda_core import robustness as rb
 from fda_core.analyses.backtesting import LABEL, _close, _evaluate, _strategy, _target, _validation
 from fda_core.analyses.price import PRICE_SUBJECTS, _prices
 from fda_core.registry import AnalysisInputs, AnalysisOutput, InsufficientDataError, analysis
@@ -162,11 +163,17 @@ class ChallengeParams(BaseModel):
     min_days: int = Field(4, ge=1, le=30)
     horizon_days: int = Field(250, ge=20, le=750)
     seed: int = 1
+    # CFD costs (prop firms trade CFDs): all zero = the strategy's own fees and slippage
+    cfd_spread_bps: float = Field(0.0, ge=0, le=200, description="Spread paid on each change")
+    cfd_swap_long: float = Field(
+        0.0, ge=-0.5, le=1.0, description="Annual swap on long positions (0.078 = −7.8 %/yr)"
+    )
+    cfd_swap_short: float = Field(0.0, ge=-0.5, le=1.0, description="Annual swap on shorts")
 
 
 @analysis(
     id="TR-019",
-    version="1.0.0",
+    version="1.1.0",
     title="Prop-firm challenge Monte Carlo",
     description=(
         "Probability of passing a two-phase funded-account challenge (default FTMO-style: +10 % "
@@ -189,7 +196,13 @@ def prop_challenge(inputs: AnalysisInputs, params: ChallengeParams) -> AnalysisO
     frame = bt.run_vectorised(
         close, _target(strat["spec"], close, ev["params"]), ev["costs"], ev["warmup"]
     )
-    daily = frame.loc[frame.index >= ev["cut"], "net"].to_numpy()
+    cfd = params.cfd_spread_bps > 0 or params.cfd_swap_long != 0 or params.cfd_swap_short != 0
+    net = (
+        rb.cfd_net(frame, params.cfd_spread_bps, params.cfd_swap_long, params.cfd_swap_short)
+        if cfd
+        else frame["net"]
+    )
+    daily = net.loc[net.index >= ev["cut"]].to_numpy()
     if len(daily) < 252:
         raise InsufficientDataError(f"Needs ≥ 252 OOS days, got {len(daily)}")
     rows = carver.prop_challenge(
@@ -212,6 +225,12 @@ def prop_challenge(inputs: AnalysisInputs, params: ChallengeParams) -> AnalysisO
             "label": LABEL,
             "validation": validation,
             "oos_days": len(daily),
+            "costs_model": (
+                f"CFD: spread {params.cfd_spread_bps:g} bp per change, swap "
+                f"{params.cfd_swap_long:.1%} a year long, {params.cfd_swap_short:.1%} short"
+                if cfd
+                else "the strategy's fees and slippage"
+            ),
             "oos_volatility": _f(
                 np.std(daily, ddof=1) * math.sqrt(carver.bars_per_year(close.index))
             ),

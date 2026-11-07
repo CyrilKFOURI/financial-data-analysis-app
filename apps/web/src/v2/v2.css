@@ -990,3 +990,16 @@
   max-width: 88ch;
   text-wrap: pretty;
 }
+
+/* step state from the robustness checks: OK / to review (colour = state only) */
+.v2-steps .state {
+  width: 6px;
+  height: 6px;
+  margin-left: 2px;
+}
+.v2-steps .state[data-state='valid'] {
+  background: var(--up);
+}
+.v2-steps .state[data-state='review'] {
+  background: var(--warn);
+}

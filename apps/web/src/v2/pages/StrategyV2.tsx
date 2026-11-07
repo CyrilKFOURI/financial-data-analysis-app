@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { getStrategy, type StrategyRow } from '../../api/client'
+import { payloadOf, useAssetAnalyses } from '../../api/useAnalyses'
 import { formatInteger } from '../../format'
 import { STRATEGY_PAGES } from '../../workspace/pages'
 import { BlockGrid, panelIndex } from '../doc/BlockGrid'
@@ -25,8 +26,11 @@ const STEPS: Step[] = [
   {
     key: 'grid',
     label: 'Grid & plateau',
-    lead: 'Every parameter set of the grid. A credible choice sits on a plateau of good neighbours, not on an isolated peak.',
-    places: [{ id: 'tr-grid', span: 12, height: 560 }],
+    lead: 'Every parameter set of the grid. A credible choice sits on a plateau of good neighbours, not on an isolated peak. The best in-sample sets are then combined (OR, AND, vote, mean) and each one faces its shadows: the same positions shifted in time, which keeps exposure and destroys timing.',
+    places: [
+      { id: 'tr-grid', span: 12, height: 560 },
+      { id: 'tr-ensembles', span: 12, height: 520 },
+    ],
   },
   {
     key: 'validation',
@@ -46,8 +50,9 @@ const STEPS: Step[] = [
   {
     key: 'robustness',
     label: 'Robustness & stress',
-    lead: 'Strategy risk, synthetic paths, event-driven fills and the prop-firm challenge Monte Carlo.',
+    lead: 'Quant Rick’s protocol: the same rule executed one and two days later, two periods fixed in advance against buy & hold, the vol-targeted buy & hold and the 200-day filter, each layer removed in turn. Then strategy risk, synthetic paths and the prop-firm challenge.',
     places: [
+      { id: 'tr-robustness', span: 12, height: 760 },
       { id: 'tr-strategy-risk', span: 6, height: 520 },
       { id: 'tr-synthetic', span: 6, height: 520 },
     ],
@@ -59,6 +64,32 @@ const STEPS: Step[] = [
     places: [{ id: 'tr-monitor', span: 12, height: 520 }],
   },
 ]
+
+/** Which pipeline step each robustness check (TR-024) belongs to. */
+const CHECK_STEP: Record<string, string> = {
+  Plateau: 'grid',
+  'Trades a year': 'grid',
+  'Execution delay': 'robustness',
+  'Both epochs': 'robustness',
+  Layers: 'robustness',
+}
+
+type Check = { check: string; status: 'pass' | 'warn' | 'n/a'; detail: string }
+
+/** Step state from the protocol's checks: valid when all pass, review when one warns. */
+function useStepStates() {
+  const calls = useMemo(() => [{ id: 'TR-024' }], [])
+  const query = useAssetAnalyses(calls)
+  const checks = payloadOf<{ checks: Check[] }>(query.data, 'TR-024')?.checks ?? []
+  return (step: string): { state: 'valid' | 'review'; detail: string } | undefined => {
+    const mine = checks.filter((c) => CHECK_STEP[c.check] === step && c.status !== 'n/a')
+    if (!mine.length) return undefined
+    return {
+      state: mine.every((c) => c.status === 'pass') ? 'valid' : 'review',
+      detail: mine.map((c) => `${c.check}: ${c.status} — ${c.detail}`).join('\n'),
+    }
+  }
+}
 
 /** V1 page → V2 step. */
 const V1_TO_V2: Record<string, string> = {
@@ -141,6 +172,7 @@ export function StrategyV2() {
     0,
   )
   const step = STEPS[index]!
+  const stateOf = useStepStates()
   const next = STEPS[index + 1]
 
   useEffect(() => {
@@ -196,6 +228,17 @@ export function StrategyV2() {
           >
             <span className="n">{i + 1}</span>
             {s.label}
+            {(() => {
+              const st = stateOf(s.key)
+              return st ? (
+                <span
+                  className="state"
+                  data-state={st.state}
+                  title={st.detail}
+                  aria-label={st.state === 'valid' ? 'checks passed' : 'checks to review'}
+                />
+              ) : null
+            })()}
           </Link>
         ))}
       </nav>
