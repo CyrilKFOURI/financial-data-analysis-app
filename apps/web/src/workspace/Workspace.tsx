@@ -55,6 +55,8 @@ import {
   TailsPanel,
 } from './panels/StatsPanels'
 import { PlaceholderPanel } from './PlaceholderPanel'
+import { useUiVersion } from '../v2/ui-version'
+import { WorkspaceDoc } from '../v2/doc/WorkspaceDoc'
 
 const FDA_THEME: DockviewTheme = {
   name: 'fda',
@@ -64,7 +66,7 @@ const FDA_THEME: DockviewTheme = {
   dndTabIndicator: 'line',
 }
 
-const COMPONENTS = {
+export const COMPONENTS = {
   placeholder: PlaceholderPanel,
   'data-status': DataStatusPanel,
   'key-figures': KeyFiguresPanel,
@@ -159,8 +161,17 @@ function addDefaultPanels(api: DockviewApi, allPanels: PanelSpec[]) {
 
 type WorkspaceProps = { workspaceKey: string; panels: PanelSpec[] }
 
+/** Dock area of a page; in interface V2, a scrolling grid of blocks instead of docked panels. */
+export function Workspace(props: WorkspaceProps) {
+  return useUiVersion((s) => s.version) === 'v2' ? (
+    <WorkspaceDoc panels={props.panels} />
+  ) : (
+    <DockWorkspace {...props} />
+  )
+}
+
 /** Dock area of a page: restores the saved layout or builds the module's default one. */
-export function Workspace({ workspaceKey, panels }: WorkspaceProps) {
+function DockWorkspace({ workspaceKey, panels }: WorkspaceProps) {
   const subscription = useRef<{ dispose: () => void } | null>(null)
 
   useEffect(() => () => subscription.current?.dispose(), [])

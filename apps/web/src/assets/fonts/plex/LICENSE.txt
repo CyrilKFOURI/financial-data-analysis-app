@@ -1,0 +1,2 @@
+Copyright 2017 IBM Corp. Licensed under the SIL Open Font License 1.1 (https://openfontlicense.org).
+Files copied from @fontsource/ibm-plex-sans and @fontsource/ibm-plex-mono (latin subsets).

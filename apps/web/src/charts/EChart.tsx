@@ -46,7 +46,7 @@ export function EChart({ option, testId }: EChartProps) {
     const chart = echarts.init(host.current, undefined, { renderer: 'canvas' })
     chart.setOption({
       animation: false,
-      textStyle: { fontFamily: 'Inter Variable, sans-serif', color: tokens().fg2 },
+      textStyle: { fontFamily: tokens().sans, color: tokens().fg2 },
       grid: { left: 48, right: 12, top: 16, bottom: 28 },
       ...option(tokens()),
     })

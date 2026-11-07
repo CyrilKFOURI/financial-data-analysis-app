@@ -6,52 +6,76 @@ import {
   redirect,
 } from '@tanstack/react-router'
 import { HomePage } from './routes/HomePage'
-import { AppShell } from './shell/AppShell'
 import { parseContextSearch } from './state/context'
+import {
+  AssetV2,
+  framed,
+  HomeV2,
+  lazyPage,
+  MarketsV2,
+  PortfolioV2,
+  Root,
+  StrategyV2,
+  versioned,
+} from './v2/versioning'
+import { useUiVersion } from './v2/ui-version'
 
 const rootRoute = createRootRoute({
-  component: AppShell,
+  component: Root,
   validateSearch: parseContextSearch,
 })
 
-/** No separate home: the app opens on Markets (the search bar opens any asset). */
+/** V1 has no home (it opens on Markets); V2 has one (spec §5). */
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: ({ search }) => {
-    throw redirect({ to: '/m', search })
+    if (useUiVersion.getState().version === 'v1') throw redirect({ to: '/m', search })
   },
+  component: HomeV2,
 })
 
 /** Engine diagnostics, data status and quick open (was the home page). */
 const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/system',
-  component: HomePage,
+  component: framed(HomePage, 'settings'),
 })
 
 const assetRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/a/$symbol/$page',
-  component: lazyRouteComponent(() => import('./routes/AssetPage'), 'AssetPage'),
+  component: versioned(
+    lazyPage(() => import('./routes/AssetPage'), 'AssetPage'),
+    AssetV2,
+  ),
 })
 
 const portfoliosRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/p',
-  component: lazyRouteComponent(() => import('./routes/PortfoliosPage'), 'PortfoliosPage'),
+  component: framed(
+    lazyPage(() => import('./routes/PortfoliosPage'), 'PortfoliosPage'),
+    'portfolios',
+  ),
 })
 
 const portfolioRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/p/$pid/$page',
-  component: lazyRouteComponent(() => import('./routes/PortfolioPage'), 'PortfolioPage'),
+  component: versioned(
+    lazyPage(() => import('./routes/PortfolioPage'), 'PortfolioPage'),
+    PortfolioV2,
+  ),
 })
 
 const comparisonsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/c',
-  component: lazyRouteComponent(() => import('./routes/ComparisonsPage'), 'ComparisonsPage'),
+  component: framed(
+    lazyPage(() => import('./routes/ComparisonsPage'), 'ComparisonsPage'),
+    'research',
+  ),
 })
 
 const comparisonRoute = createRoute({
@@ -71,13 +95,19 @@ const marketsIndexRoute = createRoute({
 const marketsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/m/$page',
-  component: lazyRouteComponent(() => import('./routes/MarketsPage'), 'MarketsPage'),
+  component: versioned(
+    lazyPage(() => import('./routes/MarketsPage'), 'MarketsPage'),
+    MarketsV2,
+  ),
 })
 
 const universesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/u',
-  component: lazyRouteComponent(() => import('./routes/UniversesPage'), 'UniversesPage'),
+  component: framed(
+    lazyPage(() => import('./routes/UniversesPage'), 'UniversesPage'),
+    'research',
+  ),
 })
 
 const universeRoute = createRoute({
@@ -89,7 +119,10 @@ const universeRoute = createRoute({
 const investRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/invest',
-  component: lazyRouteComponent(() => import('./routes/InvestPage'), 'InvestPage'),
+  component: framed(
+    lazyPage(() => import('./routes/InvestPage'), 'InvestPage'),
+    'portfolios',
+  ),
 })
 
 const profileRoute = createRoute({
@@ -101,19 +134,28 @@ const profileRoute = createRoute({
 const strategiesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/t',
-  component: lazyRouteComponent(() => import('./routes/StrategiesPage'), 'StrategiesPage'),
+  component: framed(
+    lazyPage(() => import('./routes/StrategiesPage'), 'StrategiesPage'),
+    'trading',
+  ),
 })
 
 const strategyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/t/$sid/$page',
-  component: lazyRouteComponent(() => import('./routes/StrategyPage'), 'StrategyPage'),
+  component: versioned(
+    lazyPage(() => import('./routes/StrategyPage'), 'StrategyPage'),
+    StrategyV2,
+  ),
 })
 
 const paperAccountsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/paper',
-  component: lazyRouteComponent(() => import('./routes/PaperAccountsPage'), 'PaperAccountsPage'),
+  component: framed(
+    lazyPage(() => import('./routes/PaperAccountsPage'), 'PaperAccountsPage'),
+    'trading',
+  ),
 })
 
 const paperRoute = createRoute({
@@ -125,13 +167,19 @@ const paperRoute = createRoute({
 const actionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ai/actions',
-  component: lazyRouteComponent(() => import('./routes/ActionsPage'), 'ActionsPage'),
+  component: framed(
+    lazyPage(() => import('./routes/ActionsPage'), 'ActionsPage'),
+    'ai',
+  ),
 })
 
 const schedulesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/schedules',
-  component: lazyRouteComponent(() => import('./routes/SchedulesPage'), 'SchedulesPage'),
+  component: framed(
+    lazyPage(() => import('./routes/SchedulesPage'), 'SchedulesPage'),
+    'settings',
+  ),
 })
 
 const agentRoute = createRoute({
@@ -140,25 +188,37 @@ const agentRoute = createRoute({
   // the asset the console was opened from (page context sent with each question)
   validateSearch: (search: Record<string, unknown>): { s?: string } =>
     typeof search.s === 'string' && /^[\w.^=-]{1,20}$/.test(search.s) ? { s: search.s } : {},
-  component: lazyRouteComponent(() => import('./routes/AgentPage'), 'AgentPage'),
+  component: framed(
+    lazyPage(() => import('./routes/AgentPage'), 'AgentPage'),
+    'ai',
+  ),
 })
 
 const agentRunsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ai/runs',
-  component: lazyRouteComponent(() => import('./routes/AgentRunsPage'), 'AgentRunsPage'),
+  component: framed(
+    lazyPage(() => import('./routes/AgentRunsPage'), 'AgentRunsPage'),
+    'ai',
+  ),
 })
 
 const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/users',
-  component: lazyRouteComponent(() => import('./routes/UsersPage'), 'UsersPage'),
+  component: framed(
+    lazyPage(() => import('./routes/UsersPage'), 'UsersPage'),
+    'settings',
+  ),
 })
 
 const alertsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/alerts',
-  component: lazyRouteComponent(() => import('./routes/AlertsPage'), 'AlertsPage'),
+  component: framed(
+    lazyPage(() => import('./routes/AlertsPage'), 'AlertsPage'),
+    'trading',
+  ),
 })
 
 const routeTree = rootRoute.addChildren([

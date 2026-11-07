@@ -7,11 +7,13 @@ import { getEngineState, subscribeEngineState } from '../demo/engineState'
 import { APP_VERSION } from '../version'
 import { resolveContext } from '../state/context'
 import { useUiStore } from '../state/ui-store'
+import { useUiVersion } from '../v2/ui-version'
 
 export function StatusBar() {
   const { symbol } = useParams({ strict: false })
   const context = resolveContext(useSearch({ from: '__root__' }))
   const theme = useUiStore((s) => s.theme)
+  const { version, setVersion } = useUiVersion()
   const health = useQuery({
     queryKey: ['health'],
     queryFn: getHealth,
@@ -80,6 +82,14 @@ export function StatusBar() {
         </a>
       ) : null}
       <span className={`${user || DEMO ? '' : 'ml-auto '}border-l border-rule px-2`}>{theme}</span>
+      <button
+        type="button"
+        className="border-l border-rule px-2 text-accent hover:underline"
+        onClick={() => setVersion(version === 'v1' ? 'v2' : 'v1')}
+        data-testid="ui-version-toggle"
+      >
+        {version === 'v1' ? 'Try the new interface (V2)' : 'Interface V2 · back to V1'}
+      </button>
       <span className="border-l border-rule px-2 tabular-nums">v{APP_VERSION}</span>
     </footer>
   )

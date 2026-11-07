@@ -27,7 +27,8 @@ export function useSubject(): {
     aid = '',
   } = useParams({ strict: false })
   const { pathname } = useLocation()
-  if (pathname.startsWith('/m/')) return { type: 'market', id: 'global' }
+  // the V2 home page shows the market table
+  if (pathname.startsWith('/m/') || pathname === '/') return { type: 'market', id: 'global' }
   if (aid) return { type: 'paper', id: aid }
   if (sid) return { type: 'strategy', id: sid }
   if (prof) return { type: 'profile', id: prof }

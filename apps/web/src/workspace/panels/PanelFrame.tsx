@@ -46,7 +46,10 @@ export function PanelFrame({
     <div className="flex h-full flex-col overflow-hidden" data-testid={testId}>
       {toolbar ? (
         // wraps instead of clipping when the panel is narrow: every control stays reachable
-        <div className="flex min-h-7 shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-2 py-1 text-[11px]">
+        <div
+          data-toolbar
+          className="flex min-h-7 shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-2 py-1 text-[11px]"
+        >
           {toolbar}
         </div>
       ) : null}

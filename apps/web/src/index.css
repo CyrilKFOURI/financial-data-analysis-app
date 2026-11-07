@@ -4,6 +4,7 @@
 @import 'tailwindcss';
 @import './design/tokens.css';
 @import './design/dockview-theme.css';
+@import './v2/v2.css';
 
 @theme inline {
   --color-bg-0: var(--bg-0);
@@ -19,9 +20,15 @@
   --color-up: var(--up);
   --color-down: var(--down);
   --color-warn: var(--warn);
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-sans: var(--ui-sans);
+  --font-mono: var(--ui-mono);
   --radius-xs: 2px;
+}
+
+/* V1 faces; V2 swaps them (src/v2/v2.css) */
+:root {
+  --ui-sans: 'Inter Variable', system-ui, sans-serif;
+  --ui-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 }
 
 html,
@@ -34,7 +41,7 @@ body {
   margin: 0;
   background: var(--bg-0);
   color: var(--fg-1);
-  font-family: var(--font-sans);
+  font-family: var(--ui-sans);
   font-size: 13px;
   line-height: 18px;
   font-feature-settings:

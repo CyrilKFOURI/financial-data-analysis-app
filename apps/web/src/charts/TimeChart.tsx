@@ -25,7 +25,8 @@ export type ChartLayer =
       kind: 'line' | 'area'
       dates: string[]
       values: (number | null)[]
-      color?: number
+      /** Series palette index, or a semantic token ('down' for drawdowns and losses). */
+      color?: number | 'down' | 'up'
       dashed?: boolean
       label?: string
     }
@@ -85,7 +86,9 @@ function addLayer(chart: IChartApi, layer: ChartLayer) {
     return
   }
   if (layer.kind !== 'line' && layer.kind !== 'area') return
-  const color = token(`--series-${layer.color ?? 1}`)
+  const color = token(
+    typeof layer.color === 'string' ? `--${layer.color}` : `--series-${layer.color ?? 1}`,
+  )
   const common = {
     lineWidth: 1 as const,
     lineStyle: layer.dashed ? 2 : 0,
@@ -119,7 +122,7 @@ export function TimeChart({ layers, logScale = false, testId }: TimeChartProps) 
       layout: {
         background: { type: ColorType.Solid, color: token('--bg-0') },
         textColor: token('--fg-2'),
-        fontFamily: 'JetBrains Mono Variable, monospace',
+        fontFamily: token('--ui-mono') || 'monospace',
         fontSize: 11,
         attributionLogo: false,
       },
@@ -128,6 +131,10 @@ export function TimeChart({ layers, logScale = false, testId }: TimeChartProps) 
       // fitContent must show the whole range even in narrow panels (default min spacing 0.5 px).
       timeScale: { borderColor: token('--rule'), minBarSpacing: 0.001 },
       crosshair: { vertLine: { color: token('--fg-3') }, horzLine: { color: token('--fg-3') } },
+      // in a scrolling page (interface V2) the wheel scrolls the page; drag and pinch still zoom
+      ...(document.documentElement.dataset.ui === 'v2'
+        ? { handleScroll: { mouseWheel: false }, handleScale: { mouseWheel: false } }
+        : {}),
     })
     for (const layer of layers) addLayer(chart, layer)
     chart.timeScale().fitContent()

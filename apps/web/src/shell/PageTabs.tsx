@@ -11,6 +11,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react'
+import { useUiVersion } from '../v2/ui-version'
 
 const MENU_ITEM =
   'block whitespace-nowrap border-b border-rule px-3 py-1.5 text-fg-2 last:border-b-0 hover:bg-bg-2 hover:text-fg-1'
@@ -18,23 +19,45 @@ const BUTTON_ESTIMATE = 120
 
 type TabElement = ReactElement<{ className?: string; children?: ReactNode }>
 
+/** Page tabs of a V1 page: in interface V2 they become a title row with page tabs and buttons. */
+export function PageTabs(props: PageTabsProps) {
+  return useUiVersion((s) => s.version) === 'v2' ? (
+    <PageTabsAsTitleRow {...props} />
+  ) : (
+    <PageTabsStrip {...props} />
+  )
+}
+
+type PageTabsProps = {
+  label?: ReactNode
+  actions?: ReactNode
+  ariaLabel: string
+  children: ReactNode
+}
+
+function PageTabsAsTitleRow({ label, actions, ariaLabel, children }: PageTabsProps) {
+  return (
+    <div className="v2-title">
+      {label ? (
+        <div className="v2-crumbs">
+          <h1 data-testid="tabs-title">{label}</h1>
+        </div>
+      ) : null}
+      <nav className="v2-pagetabs" aria-label={ariaLabel}>
+        {children}
+      </nav>
+      {actions ? <div className="actions v2-adapted-actions">{actions}</div> : null}
+    </div>
+  )
+}
+
 /**
  * Workspace page tabs. The title stays on the left and the actions on the right. Tabs never wrap
  * or shrink: the ones that fit are shown, the others go into a "+n pages ▾" menu that lists them
  * by name (one click opens the page). When the current page is in the menu, the button shows its
  * name in the accent colour.
  */
-export function PageTabs({
-  label,
-  actions,
-  ariaLabel,
-  children,
-}: {
-  label?: ReactNode
-  actions?: ReactNode
-  ariaLabel: string
-  children: ReactNode
-}) {
+function PageTabsStrip({ label, actions, ariaLabel, children }: PageTabsProps) {
   const tabs = Children.toArray(children).filter(isValidElement) as TabElement[]
   const strip = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)

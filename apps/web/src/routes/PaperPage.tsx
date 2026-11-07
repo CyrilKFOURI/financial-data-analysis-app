@@ -46,6 +46,7 @@ export function PaperPage() {
             </span>
             <button
               type="button"
+              data-reset-layout
               className={TAB_ACTION}
               onClick={() => {
                 clearLayout(layoutStorageKey(workspaceKey))

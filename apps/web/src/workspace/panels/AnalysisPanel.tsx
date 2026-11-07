@@ -57,7 +57,41 @@ const isNumberArray = (value: unknown): value is (number | null)[] =>
   value.length > 1 &&
   value.every((v) => v === null || typeof v === 'number')
 
-const label = (key: string) => key.replace(/_/g, ' ')
+/** Abbreviations kept in capitals when keys become labels. */
+const ACRONYMS = new Set(
+  'twr mwr ytd mtd hhi es cagr capm ath pnl iqr mae mfe sqn psr dsr pbo cdar ewma garch adx rsi macd atr obv fx etf usd eur gbp chf jpy id ic ir ols wls ar ma ff3 ff5 dcf wacc eps pe ev ebit ebitda roe roa roic fcf dd nav nw r2 hy ig cpi gdp'.split(
+    ' ',
+  ),
+)
+
+/** Names kept capitalised inside a label. */
+const PROPER = new Set(
+  'sharpe sortino calmar sterling burke omega rachev treynor kelly jensen ulcer martin kalman hurst ljung box jarque bera shapiro wilk anderson darling piotroski altman beneish ohlson montier fama french carhart carver donchian bollinger'.split(
+    ' ',
+  ),
+)
+
+const word = (w: string) => {
+  const lower = w.toLowerCase()
+  if (lower === 'oos') return 'OOS'
+  if (PROPER.has(lower)) return lower.charAt(0).toUpperCase() + lower.slice(1)
+  const value = /^(c?)var(\d*)$/.exec(lower)
+  if (value) return `${value[1] ? 'C' : ''}VaR${value[2]}`
+  return ACRONYMS.has(lower) ? lower.toUpperCase() : w
+}
+
+/** `worst_day` → "Worst day", `var95_1d` → "VaR95 1d": sentence case, abbreviations kept. */
+const label = (key: string) => {
+  // `is_sharpe`: in-sample, not the verb
+  const text = key
+    .replace(/^is_/, 'IS_')
+    .replace(/_/g, ' ')
+    .replace(/\./g, ' · ')
+    .split(' ')
+    .map(word)
+    .join(' ')
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
 
 /** Keys whose numbers are fractions of 1 (returns, vols, drawdowns, losses…) shown in %. */
 const PERCENT_KEY =
@@ -76,8 +110,10 @@ function display(value: unknown, key?: string): string | null {
     const abs = Math.abs(value)
     return formatNumber(value, abs !== 0 && (abs < 0.01 || abs >= 1e5) ? 4 : abs < 10 ? 3 : 1)
   }
-  if (typeof value === 'string' || typeof value === 'boolean') return String(value)
+  if (typeof value === 'string') return value === '' ? null : value
+  if (typeof value === 'boolean') return value ? 'yes' : 'no'
   if (value === null) return '—'
+  if (Array.isArray(value) && value.length === 0) return null
   if (
     Array.isArray(value) &&
     value.length <= 6 &&
@@ -291,6 +327,7 @@ const isRecordList = (value: unknown): value is Record<string, unknown>[] =>
 const SYMBOL_COLUMNS = new Set(['symbol', 'ticker', 'member', 'asset'])
 const TICKER = /^[A-Z0-9][A-Z0-9.^=-]{0,19}$/
 const DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/
+const DATE = /^\d{4}-\d{2}-\d{2}$/
 const pad = (n: number) => String(n).padStart(2, '0')
 
 /** One table cell: tickers open their analysis, web links open in a new tab, timestamps show
@@ -317,6 +354,7 @@ function Cell({ column, value }: { column: string; value: unknown }) {
         </a>
       )
     }
+    if (DATE.test(value)) return <span className="whitespace-nowrap">{value}</span>
     if (DATETIME.test(value)) {
       const at = new Date(value)
       if (!Number.isNaN(at.getTime()))
@@ -331,7 +369,10 @@ function Cell({ column, value }: { column: string; value: unknown }) {
           </span>
         )
     }
-    return <>{label(value)}</>
+    // a data value, not a key: only underscores become spaces
+    const text = value.replace(/_/g, ' ')
+    if (ACRONYMS.has(text.toLowerCase())) return <>{text.toUpperCase()}</>
+    return <>{text.charAt(0).toUpperCase() + text.slice(1)}</>
   }
   return <>{display(value, column) ?? '—'}</>
 }
@@ -347,6 +388,12 @@ function RecordTables({ payload }: { payload: Record<string, unknown> }) {
         const columns = Object.keys(rows[0] ?? {}).filter(
           (column) => !column.startsWith('_') && rows.some((row) => display(row[column]) !== null),
         )
+        // numbers align right, like every other table (UI_UX §6)
+        const numeric = new Set(
+          columns.filter((column) =>
+            rows.every((row) => typeof row[column] === 'number' || row[column] == null),
+          ),
+        )
         return (
           <div key={key} className="border-b border-rule">
             <p className="micro-label px-2 pt-1.5">{label(key)}</p>
@@ -354,7 +401,10 @@ function RecordTables({ payload }: { payload: Record<string, unknown> }) {
               <thead>
                 <tr className="micro-label">
                   {columns.map((column) => (
-                    <th key={column} className={`${th} text-left`}>
+                    <th
+                      key={column}
+                      className={`${th} ${numeric.has(column) ? 'text-right' : 'text-left'}`}
+                    >
                       {label(column)}
                     </th>
                   ))}
@@ -368,7 +418,7 @@ function RecordTables({ payload }: { payload: Record<string, unknown> }) {
                       return (
                         <td
                           key={column}
-                          className={`${td} tabular-nums ${typeof value === 'number' && value < 0 ? 'text-down' : ''}`}
+                          className={`${td} tabular-nums ${numeric.has(column) ? 'text-right' : ''} ${typeof value === 'number' && value < 0 ? 'text-down' : ''}`}
                         >
                           <Cell column={column} value={value} />
                         </td>
@@ -386,6 +436,12 @@ function RecordTables({ payload }: { payload: Record<string, unknown> }) {
 }
 
 /** Finds a dates array and the numeric series aligned with it, at the top level or one level down. */
+/** Series that are a reference to beat, not the subject. */
+const BENCHMARK_KEY = /buy_and_hold|benchmark|bench|vol_targeted_bh/i
+
+/** Analyses whose time series is a drawdown (drawn in the loss colour). */
+const UNDERWATER = new Set(['R-001'])
+
 function timeLayers(payload: Record<string, unknown>, keys?: string[]): ChartLayer[] {
   const containers: Record<string, unknown>[] = [payload]
   for (const value of Object.values(payload)) {
@@ -416,7 +472,13 @@ function timeLayers(payload: Record<string, unknown>, keys?: string[]): ChartLay
         kind: 'line' as const,
         dates: dates as string[],
         values: values as (number | null)[],
-        color: (i % 6) + 1,
+        // colour = meaning (UI_UX §4): losses red, benchmarks dashed grey, the subject first
+        color: /drawdown|underwater|loss/i.test(key)
+          ? ('down' as const)
+          : BENCHMARK_KEY.test(key)
+            ? 6
+            : (i % 6) + 1,
+        dashed: BENCHMARK_KEY.test(key),
         label: label(key.replace(/^lines\./, '')),
       }))
     }
@@ -446,10 +508,13 @@ export function AnalysisPanel({ params: spec }: IDockviewPanelProps<PanelSpec>) 
   const result = config ? query.data?.[config.analysisId] : undefined
   const payload =
     result && !isProblem(result) ? (result.payload as Record<string, unknown>) : undefined
-  const layers = useMemo(
-    () => (payload ? timeLayers(payload, config?.lines) : []),
-    [payload, config],
-  )
+  const layers = useMemo(() => {
+    const built = payload ? timeLayers(payload, config?.lines) : []
+    // underwater curves are losses whatever their key is called
+    return config && UNDERWATER.has(config.analysisId)
+      ? built.map((layer) => (layer.kind === 'line' ? { ...layer, color: 'down' as const } : layer))
+      : built
+  }, [payload, config])
   const tests = Array.isArray(payload?.tests) ? (payload.tests as TestRow[]) : null
   const warnings = result && !isProblem(result) ? result.warnings : []
 
@@ -568,7 +633,7 @@ export function AnalysisPanel({ params: spec }: IDockviewPanelProps<PanelSpec>) 
           ) : null}
           <button
             type="button"
-            className="ml-auto px-1 font-mono text-fg-3 hover:text-fg-1"
+            className="formula-link ml-auto px-1 font-mono text-fg-3 hover:text-fg-1"
             onClick={() => openDrawer(config.analysisId)}
             title={`Formula and definition of ${config.analysisId}`}
             aria-label={`Formula of ${config.analysisId}`}

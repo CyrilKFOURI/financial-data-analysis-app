@@ -298,6 +298,34 @@ export function AgentPage() {
         </Link>
       </div>
       <div className="min-h-0 flex-1 overflow-auto px-3 py-2" data-testid="agent-thread">
+        {thread.length === 0 ? (
+          <div className="max-w-[72ch] py-6" data-testid="agent-empty">
+            <p className="text-[13px] text-fg-1">
+              Ask about an asset, a portfolio or a strategy. The analyst calls the app’s own
+              analyses and cites each number; it measures and explains, it does not tell you what to
+              buy.
+            </p>
+            <p className="mt-3 mb-1 text-fg-3">For example</p>
+            <ul className="flex flex-col items-start gap-1">
+              {[
+                `How volatile has ${symbol ?? 'QQQ'} been this year, and how deep was its worst drawdown?`,
+                `Compare ${symbol ?? 'SPY'} with QQQ on risk-adjusted return over 3 years.`,
+                'Which holdings drive the risk of portfolio 1?',
+                'Did the Carver strategy survive its out-of-sample test?',
+              ].map((example) => (
+                <li key={example}>
+                  <button
+                    type="button"
+                    className="text-left text-accent hover:underline"
+                    onClick={() => setQuestion(example)}
+                  >
+                    {example}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         {thread.map((e, n) => (
           <Fragment key={n}>
             <p className="mt-2 border-l border-accent pl-2 text-fg-1">{e.question}</p>

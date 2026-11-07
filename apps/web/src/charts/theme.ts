@@ -11,6 +11,8 @@ export const tokens = () => {
     up: get('--up'),
     down: get('--down'),
     accent: get('--accent'),
+    sans: get('--ui-sans') || 'sans-serif',
+    mono: get('--ui-mono') || 'monospace',
     series: [1, 2, 3, 4, 5, 6].map((i) => get(`--series-${i}`)),
   }
 }
@@ -21,7 +23,7 @@ export const axisStyle = () => {
   return {
     axisLine: { lineStyle: { color: t.rule } },
     axisTick: { show: false },
-    axisLabel: { color: t.fg2, fontFamily: 'JetBrains Mono Variable, monospace', fontSize: 10 },
+    axisLabel: { color: t.fg2, fontFamily: t.mono, fontSize: 10 },
     splitLine: { lineStyle: { color: t.rule } },
   }
 }

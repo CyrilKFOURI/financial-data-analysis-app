@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "oxlint",
+    "lint": "oxlint && node scripts/check-v2.mjs",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "format": "prettier --write .",

@@ -445,7 +445,7 @@ export function FootballFieldPanel() {
           splitLine: { show: false },
           axisLabel: {
             ...axisStyle().axisLabel,
-            fontFamily: 'Inter Variable, sans-serif',
+            fontFamily: t.sans,
             fontSize: 11,
           },
         },

@@ -153,8 +153,8 @@ test('time series lab runs the stationarity battery and switches series', async 
     .toBeGreaterThan(0)
   await page.goto('/a/FAKED/ts?range=3Y')
   const battery = page.getByTestId('ts-stationarity')
-  await expect(battery.getByTestId('tests-table')).toContainText('adf')
-  await expect(battery.getByTestId('tests-table')).toContainText('kpss')
+  await expect(battery.getByTestId('tests-table')).toContainText(/adf/i)
+  await expect(battery.getByTestId('tests-table')).toContainText(/kpss/i)
   await battery.getByLabel('Series').selectOption('returns') // long option lists are a menu
   await expect(battery.getByTestId('tests-table')).toContainText('stationary at α')
   await expect(page.getByTestId('ts-fracdiff')).toContainText('d star')
@@ -172,7 +172,7 @@ test('risk page shows drawdowns, VaR tables and the plain-language card', async 
     .toBeGreaterThan(0)
   await page.goto('/a/FAKEE/risk?range=5Y')
   await expect(page.getByTestId('risk-var').getByTestId('records-rows')).toContainText(
-    'cornish fisher',
+    /cornish fisher/i,
   )
   await expect(page.getByTestId('risk-card')).toContainText('10 000')
   await expect(page.getByTestId('risk-underwater').locator('canvas').first()).toBeVisible()
@@ -196,7 +196,7 @@ test('valuation page explains missing statements for a synthetic asset', async (
 test('technical page shows the indicator summary and oscillators', async ({ page }) => {
   await page.request.post('/v1/ingest/FAKEH', { headers: { 'X-FDA-Client': 'e2e' } })
   await page.goto('/a/FAKEH/technical')
-  await expect(page.getByTestId('records-rows')).toContainText('rsi')
+  await expect(page.getByTestId('records-rows')).toContainText(/rsi/i)
   await expect(page.getByTestId('tech-momentum').locator('canvas').first()).toBeVisible()
 })
 
@@ -209,7 +209,7 @@ test('portfolio: create from weights, analyse, open a what-if version', async ({
   await expect(page.getByTestId('weights-sum')).toContainText('100.00 %')
   await page.getByRole('button', { name: 'Create' }).click()
   await expect(page).toHaveURL(/\/p\/\d+\/overview/)
-  await expect(page.getByTestId('pf-concentration')).toContainText('effective n')
+  await expect(page.getByTestId('pf-concentration')).toContainText(/effective n/i)
   await page.getByLabel('Weight 1').fill('70')
   await page.getByLabel('Weight 2').fill('20')
   await page.getByRole('button', { name: 'Analyse what-if' }).click()
@@ -226,7 +226,7 @@ test('compare: ad-hoc members show the KPI matrix; risk report renders', async (
   await page.getByLabel('Comparison members').fill('FAKER, FAKES')
   await page.getByRole('button', { name: 'Compare', exact: true }).click()
   await expect(page).toHaveURL(/\/c\/FAKER(,|%2C)FAKES\/overview/)
-  await expect(page.getByTestId('cmp-kpi').getByTestId('grid-table')).toContainText('volatility')
+  await expect(page.getByTestId('cmp-kpi').getByTestId('grid-table')).toContainText(/volatility/i)
   const report = await page.request.get('/v1/reports/risk?subject=FAKER&range=1Y')
   expect(report.ok()).toBeTruthy()
   expect(await report.text()).toContain('Sources, formulas')
@@ -342,7 +342,7 @@ test('invest: questionnaire → profile → allocation (model output label)', as
   await expect(page).toHaveURL(/\/invest\/\d+\/allocation/)
   await expect(page.getByTestId('in-allocation')).toContainText('Model output')
   await page.getByRole('link', { name: 'Profile', exact: true }).click()
-  await expect(page.getByTestId('in-profile')).toContainText('risk score')
+  await expect(page.getByTestId('in-profile')).toContainText(/risk score/i)
 })
 
 test('optimiser: weights cannot be saved before the walk-forward validation', async ({ page }) => {
@@ -372,9 +372,9 @@ test('optimiser: weights cannot be saved before the walk-forward validation', as
 test('plan: DCA variants and Kelly sizing on an asset', async ({ page }) => {
   await page.request.post('/v1/ingest/FAKEPL', { headers: { 'X-FDA-Client': 'e2e' } })
   await page.goto('/a/FAKEPL/plan')
-  await expect(page.getByTestId('in-dca')).toContainText('trend filtered', { timeout: 60_000 })
+  await expect(page.getByTestId('in-dca')).toContainText(/trend filtered/i, { timeout: 60_000 })
   await page.getByRole('tab', { name: 'Kelly sizing' }).click()
-  await expect(page.getByTestId('in-kelly')).toContainText('kelly full')
+  await expect(page.getByTestId('in-kelly')).toContainText(/kelly full/i)
 })
 
 test('backtest lab: hypothesis-first strategy opens on validation', async ({ page }) => {
@@ -386,8 +386,8 @@ test('backtest lab: hypothesis-first strategy opens on validation', async ({ pag
     .fill('Trend persistence from behavioural under-reaction in a broad index.')
   await page.getByRole('button', { name: 'Create & validate' }).click()
   await expect(page).toHaveURL(/\/t\/\d+\/validation/)
-  await expect(page.getByTestId('tr-overfitting')).toContainText('dsr', { timeout: 60_000 })
-  await expect(page.getByTestId('tr-sins')).toContainText('look-ahead')
+  await expect(page.getByTestId('tr-overfitting')).toContainText(/dsr/i, { timeout: 60_000 })
+  await expect(page.getByTestId('tr-sins')).toContainText(/look-ahead/i)
 })
 
 test('paper trading: account, simulated order working until the next session', async ({ page }) => {
@@ -411,6 +411,13 @@ test('settings: users & roles in single-user mode', async ({ page }) => {
 
 test('every analysis panel opens its formula and definition', async ({ page }) => {
   await page.request.post('/v1/ingest/FAKEF', { headers: { 'X-FDA-Client': 'e2e' } })
+  // the engine version comes with a computed result: wait for the prices first
+  await expect
+    .poll(
+      async () => (await (await page.request.get('/v1/data-status/FAKEF')).json()).datasets.length,
+      { timeout: 30_000 },
+    )
+    .toBeGreaterThan(0)
   await page.goto('/a/FAKEF/risk?range=5Y')
   const formula = page.getByRole('button', { name: /^Formula of / }).first()
   await formula.click()

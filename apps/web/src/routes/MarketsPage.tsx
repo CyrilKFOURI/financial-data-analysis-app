@@ -34,6 +34,7 @@ export function MarketsPage() {
             </button>
             <button
               type="button"
+              data-reset-layout
               className={TAB_ACTION}
               onClick={() => {
                 clearLayout(layoutStorageKey(workspaceKey))
