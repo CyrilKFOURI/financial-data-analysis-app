@@ -39,7 +39,9 @@ def test_library_monitor_alerts_and_costs(
         [("TR-010", {}), ("TR-013", {"shares": 5000, "schedule": "almgren_chriss"})],
     )
     report = asset["TR-010"]["result"]["payload"]
-    assert len(report["rows"]) == 14  # 11 templates + carver_trend, macd_v, donchian_ensemble
+    assert (
+        len(report["rows"]) == 16
+    )  # 11 + carver_trend, macd_v, donchian_ensemble, tema_events, kalman
     assert all("fails_in" in r for r in report["rows"])
     costs = asset["TR-013"]["result"]["payload"]
     assert abs(sum(r["shares"] for r in costs["rows"]) - 5000) < 1e-6

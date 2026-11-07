@@ -13,7 +13,7 @@ from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
-from scipy import stats
+from scipy import linalg, stats
 
 from fda_core import carver
 from fda_core.registry import InsufficientDataError
@@ -33,6 +33,8 @@ Template = Literal[
     "carver_trend",
     "macd_v",
     "donchian_ensemble",
+    "tema_events",
+    "kalman_trend",
 ]
 
 # Default grids (the library's reference configuration space, TR-010).
@@ -51,6 +53,8 @@ DEFAULT_GRIDS: dict[str, dict[str, list[float]]] = {
     "carver_trend": {"vol_target": [0.12, 0.16, 0.2], "buffer": [0.0, 0.1]},
     "macd_v": {"fast": [8, 12], "slow": [21, 26], "threshold": [0, 50]},
     "donchian_ensemble": {"shortest": [10, 20, 40], "levels": [3, 4]},
+    "tema_events": {"fast": [4, 7, 10], "mid": [100, 119, 140], "slow": [127, 150, 180]},
+    "kalman_trend": {"memory": [50, 100]},
 }
 
 # Library documentation (TR-010): family, rules and known failure regimes.
@@ -134,6 +138,25 @@ TEMPLATE_DOCS: dict[str, dict[str, str]] = {
         ),
         "fails": "Range-bound markets after a long trend (every channel exits late)",
     },
+    "tema_events": {
+        "family": "trend",
+        "rules": (
+            "Quant Rick's TEMA notebook: three EMAs (adjust=False, empty until n bars); long after "
+            "the latest upward cross of any pair, flat after the latest downward cross; same-bar "
+            "entry and exit are ignored"
+        ),
+        "fails": "Whipsaws with a short fast EMA; edge concentrated in one bear market",
+    },
+    "kalman_trend": {
+        "family": "trend",
+        "rules": (
+            "Local linear trend Kalman filter on log prices (Q = q·R·[[1/3, 1/2], [1/2, 1]]), q "
+            "solved so the slope estimate's memory (centre of mass of its absolute weights) is "
+            "`memory` bars — 100 = the 200-day SMA slope, 50 = close vs SMA200; long while the "
+            "estimated slope is positive"
+        ),
+        "fails": "Late exits after sharp peaks (it trades less than close > SMA200, not better)",
+    },
 }
 
 
@@ -214,6 +237,10 @@ def signal(
         return _macd_v(close, int(p["fast"]), int(p["slow"]), float(p.get("threshold", 0.0)))
     elif template == "donchian_ensemble":
         return _donchian_ensemble(close, int(p["shortest"]), int(p["levels"]))
+    elif template == "tema_events":
+        return tema_events(close, int(p["fast"]), int(p["mid"]), int(p["slow"]))
+    elif template == "kalman_trend":
+        return kalman_trend(close, float(p.get("memory", 100.0)))
     elif template == "short_term_reversal":
         n, threshold = int(p.get("lookback", 5)), float(p.get("threshold", 0.03))
         drop = (close / close.shift(n) - 1) < -threshold
@@ -271,6 +298,98 @@ def _donchian_ensemble(close: pd.Series, shortest: int, levels: int) -> pd.Serie
         )
         states.append(state.ffill().fillna(0.0))
     return pd.concat(states, axis=1).mean(axis=1)
+
+
+def ema_vbt(close: pd.Series, n: int) -> pd.Series:
+    """The EMA of vectorbt `MA.run(ewm=True)`: α = 2/(n+1), adjust=False, started on the first
+    price, empty for the first n − 1 bars."""
+    return close.ewm(span=n, adjust=False, min_periods=n).mean()
+
+
+def _crossed_above(a: pd.Series, b: pd.Series) -> pd.Series:
+    """a goes from ≤ b to > b on this bar (any comparison with an empty value is false)."""
+    now = (a > b).fillna(False)
+    before = (a.shift(1) <= b.shift(1)).fillna(False)
+    return now & before
+
+
+def tema_events(close: pd.Series, n1: int, n2: int, n3: int, start: int = 0) -> pd.Series:
+    """Position of the TEMA notebook (bootcamp 1): entry on an upward cross of any EMA pair, exit
+    on a downward cross of any pair; the position is the latest event, not an alignment state.
+    Entry and exit on the same bar cancel (vectorbt conflict_mode='ignore'). Events before
+    `start` are discarded, as the notebook does when it cuts its warm-up."""
+    if min(n1, n2, n3) < 2 or max(n1, n2, n3) > len(close):
+        raise InsufficientDataError("tema_events needs spans ≥ 2 and ≤ the number of bars")
+    e1, e2, e3 = ema_vbt(close, n1), ema_vbt(close, n2), ema_vbt(close, n3)
+    up = _crossed_above(e1, e2) | _crossed_above(e1, e3) | _crossed_above(e2, e3)
+    down = _crossed_above(e2, e1) | _crossed_above(e3, e1) | _crossed_above(e3, e2)
+    up_a, down_a = up.to_numpy(), down.to_numpy()
+    out = np.zeros(len(close))
+    state = 0.0
+    for i in range(start, len(close)):
+        if up_a[i] and not down_a[i]:
+            state = 1.0
+        elif down_a[i] and not up_a[i]:
+            state = 0.0
+        out[i] = state
+    return pd.Series(out, index=close.index)
+
+
+def _kalman_system(q: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Local linear trend: x = (level, slope), F = [[1, 1], [0, 1]], H = [1, 0], R = 1,
+    Q = q·R·[[1/3, 1/2], [1/2, 1]] (integrated random walk). Returns F, H and the steady-state
+    gain K (from the discrete algebraic Riccati equation of the predicted covariance)."""
+    f = np.array([[1.0, 1.0], [0.0, 1.0]])
+    h = np.array([[1.0, 0.0]])
+    q_mat = q * np.array([[1 / 3, 1 / 2], [1 / 2, 1.0]])
+    p = linalg.solve_discrete_are(f.T, h.T, q_mat, np.array([[1.0]]))
+    k = p @ h.T / float((h @ p @ h.T).item() + 1.0)
+    return f, h, k.ravel()
+
+
+def kalman_memory(q: float, horizon: int = 4000) -> float:
+    """Memory of the rule, in bars: centre of mass of the absolute weights of the steady-state
+    slope estimate on past log prices, w_j = [((I − KH)F)^j K]_slope (they sum to 0 and are
+    unbiased: Σ −j·w_j = 1). On the same measure the 200-day SMA slope, (y_t − y_{t−200})/200,
+    has a memory of 100 bars and close − SMA200 one of 50, so the comparison is at equal memory.
+    (The level estimate cannot serve: it follows a straight line exactly, so its weights' centre
+    of mass is zero by construction.)"""
+    f, h, k = _kalman_system(q)
+    a = (np.eye(2) - np.outer(k, h.ravel())) @ f
+    w = np.empty(horizon)
+    v = k.copy()
+    for j in range(horizon):
+        w[j] = abs(v[1])
+        v = a @ v
+    return float((np.arange(horizon) * w).sum() / w.sum())
+
+
+def kalman_q(memory: float) -> float:
+    """The q whose slope estimate has this memory (bisection on log q: memory ∝ q^(−1/4))."""
+    if not 4.0 <= memory <= 300.0:
+        raise InsufficientDataError("kalman_trend memory must be between 4 and 300 bars")
+    lo, hi = -11.0, 0.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if kalman_memory(10**mid) > memory:
+            lo = mid
+        else:
+            hi = mid
+    return float(10 ** ((lo + hi) / 2))
+
+
+def kalman_trend(close: pd.Series, memory: float) -> pd.Series:
+    """Long while the steady-state Kalman slope of log prices is positive (decided at the close;
+    the engine shifts it). The filter starts on the first price with a zero slope."""
+    f, _, k = _kalman_system(kalman_q(memory))
+    y = np.log(close.to_numpy(dtype=float))
+    x = np.array([y[0], 0.0])
+    slope = np.zeros(len(y))
+    for i in range(1, len(y)):
+        pred = f @ x
+        x = pred + k * (y[i] - pred[0])
+        slope[i] = x[1]
+    return pd.Series((slope > 0).astype(float), index=close.index)
 
 
 def _supertrend(close: pd.Series, n: int, mult: float) -> pd.Series:
@@ -578,6 +697,8 @@ def ordered_constraint(template: Template) -> Callable[[dict[str, float]], bool]
         return lambda p: p["fast"] < p["slow"]
     if template == "triple_ema":
         return lambda p: p["fast"] < p["mid"] < p["slow"]
+    if template == "tema_events":  # the notebook only orders the fast EMA
+        return lambda p: p["fast"] < p["mid"] and p["fast"] < p["slow"]
     if template == "rsi_reversion":
         return lambda p: p["lower"] < p["upper"]
     return None

@@ -101,7 +101,7 @@ def test_lag_one_is_the_engine_default_and_open_execution_runs() -> None:
     rows = rb.lag_sweep(close, target, bt.Costs(), 220, periods, prices(close)["open"])
     base = bt.run_vectorised(close, target, bt.Costs(), 220)
     assert rows[0]["sharpe"] == pytest.approx(bt.sharpe(base["net"].to_numpy(), round(periods)))
-    assert [r["execution"] for r in rows] == ["close t+1", "close t+2", "close t+3", "open t+1"]
+    assert [r["execution"] for r in rows] == ["close t", "close t+1", "close t+2", "open t+1"]
 
 
 def test_short_epoch_gives_null_and_reason() -> None:

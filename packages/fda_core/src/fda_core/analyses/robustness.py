@@ -111,12 +111,13 @@ def _fmt(x: float | None) -> str:
 
 @analysis(
     id="TR-024",
-    version="1.1.0",
+    version="1.1.1",
     title="Robustness protocol",
     description=(
         "Quant Rick's corrected protocol on the saved strategy: plateau selection on in-sample "
         "Sharpe (median of each grid cell and its neighbours, ≥ 2 trades a year, off the grid's "
-        "edge); the chosen parameters executed at close t+1, t+2, t+3 and the open of t+1; two "
+        "edge); the chosen parameters traded at the decision close, one and two bars later and at "
+        "the next open; two "
         "epochs fixed in advance against buy & hold, the vol-targeted buy & hold and the MA200 "
         "filter (Sharpe ± its standard error); ablation of each layer; pass/warn checks."
     ),
@@ -245,7 +246,8 @@ def robustness_protocol(inputs: AnalysisInputs, params: RobustnessParams) -> Ana
         rb.check(
             "Execution delay",
             None if lag1 is None or lag2 is None else bool(lag1 > 0 and lag2 >= 0.5 * lag1),
-            f"Sharpe {_fmt(lag1)} at t+1, {_fmt(lag2)} at t+2: a robust rule keeps at least half",
+            f"Sharpe {_fmt(lag1)} traded at the decision close, {_fmt(lag2)} one bar later: "
+            "a robust rule keeps at least half",
         ),
         rb.check(
             "Both epochs",

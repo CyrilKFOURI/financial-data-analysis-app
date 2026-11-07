@@ -23,6 +23,7 @@ test-results/
 
 # Data & caches (lake, local DBs, model weights)
 data/
+!tests/data/
 *.parquet
 *.duckdb
 models_cache/

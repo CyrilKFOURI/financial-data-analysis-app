@@ -22,7 +22,7 @@ class LibraryParams(BaseModel):
 
 @analysis(
     id="TR-010",
-    version="1.2.0",
+    version="1.3.0",
     title="Strategy library report",
     description=(
         "Every single-asset template of the library on the subject with its default grid (warm-up "

@@ -132,13 +132,14 @@ def lag_sweep(
     adj_open: pd.Series | None = None,
     lags: Sequence[int] = (1, 2, 3),
 ) -> list[dict[str, Any]]:
-    """The same decisions executed later: at the close of t+lag, and at the open of t+1. Open
-    execution = open-to-open returns with a two-bar shift (decided at close t, entered at open
-    t+1, held to open t+2)."""
+    """The same decisions executed later. Decided at close t: lag 1 trades at that close (the
+    engine's default), lag 2 at close t+1 (the TEMA notebook's timing), lag 3 at close t+2; and
+    at the open of t+1 = open-to-open returns with a two-bar shift."""
     rows = []
     for lag in lags:
         frame = bt.run_vectorised(close, target, costs, warmup, lag)
-        rows.append({"execution": f"close t+{lag}", "lag": lag, **summary(frame["net"], periods)})
+        label = "close t" if lag == 1 else f"close t+{lag - 1}"
+        rows.append({"execution": label, "lag": lag, **summary(frame["net"], periods)})
     if adj_open is not None and adj_open.notna().all():
         frame = bt.run_vectorised(adj_open, target, costs, warmup, 2)
         rows.append({"execution": "open t+1", "lag": None, **summary(frame["net"], periods)})
