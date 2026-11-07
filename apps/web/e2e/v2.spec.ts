@@ -16,20 +16,22 @@ const ingest = async (page: Page, symbol: string) => {
     .toBeGreaterThan(0)
 }
 
-test('v2: ?ui=v2 switches the frame, the choice persists, the menu switches back', async ({
-  page,
-}) => {
-  await page.goto('/?ui=v2')
+test('v2 is the default; the archived V1 opens with ?ui=v1 and leads back', async ({ page }) => {
+  await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('data-ui', 'v2')
   await expect(page.getByRole('navigation', { name: 'Workspaces' })).toBeVisible()
   await expect(page.getByTestId('v2-home')).toBeVisible()
-  await page.reload()
-  await expect(page.locator('html')).toHaveAttribute('data-ui', 'v2')
-
+  // no menu leads to V1 any more
   await page.getByRole('button', { name: 'Settings' }).click()
-  await page.getByRole('menuitem', { name: /Interface/ }).click()
+  await expect(page.getByRole('menuitem', { name: /Interface/ })).toHaveCount(0)
+
+  await page.goto('/m/overview?ui=v1')
   await expect(page.locator('html')).toHaveAttribute('data-ui', 'v1')
-  await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-ui', 'v1')
+  await page.getByTestId('ui-version-toggle').click()
+  await expect(page.locator('html')).toHaveAttribute('data-ui', 'v2')
+  await expect(page.getByRole('navigation', { name: 'Workspaces' })).toBeVisible()
 })
 
 test('v2: asset pages fold into seven, old page links land on their section', async ({ page }) => {

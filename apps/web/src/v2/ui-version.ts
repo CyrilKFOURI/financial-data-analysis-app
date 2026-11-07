@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 
-/** Which interface is shown: V1 (dockview workbench, frozen) or V2 (docs/features/301-frontend-v2). */
+/** Which interface is shown: V2 (docs/features/301-frontend-v2), the interface of the app, or the
+ *  archived V1 (dockview workbench, frozen: docs/archive/ui-v1, feature 341), opened with `?ui=v1` only. */
 export type UiVersion = 'v1' | 'v2'
 
-const STORAGE_KEY = 'fda.ui-version'
-/** V1 unless the build says otherwise (`VITE_UI_DEFAULT=v2`, used by the V2 preview site). */
-const DEFAULT_VERSION: UiVersion = import.meta.env.VITE_UI_DEFAULT === 'v2' ? 'v2' : 'v1'
+// a new key: choices stored while V1 was the default no longer pin anyone to it
+const STORAGE_KEY = 'fda.ui-version.341'
+const DEFAULT_VERSION: UiVersion = 'v2'
 
 const isVersion = (value: unknown): value is UiVersion => value === 'v1' || value === 'v2'
 
@@ -26,7 +27,7 @@ function store(version: UiVersion) {
   }
 }
 
-/** `?ui=v1|v2` wins and is remembered; otherwise the stored choice; otherwise V1. */
+/** `?ui=v1|v2` wins and is remembered; otherwise the stored choice; otherwise V2. */
 function initialVersion(): UiVersion {
   if (typeof window === 'undefined') return DEFAULT_VERSION
   const fromUrl = new URLSearchParams(window.location.search).get('ui')

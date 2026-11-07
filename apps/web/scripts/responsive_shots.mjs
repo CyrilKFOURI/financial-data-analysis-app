@@ -32,9 +32,15 @@ for (const w of WIDTHS) {
     if (!booted) {
       await page.goto(CFG.base + url)
       try {
-        await page.waitForFunction(() => !document.querySelector('.v2-boot'), null, {
-          timeout: 150_000,
-        })
+        await page.waitForFunction(
+          () =>
+            !document.querySelector('.v2-boot') &&
+            !document.body.innerText.includes('starting the Python engine'),
+          null,
+          {
+            timeout: 150_000,
+          },
+        )
       } catch {
         console.log(name, w, 'engine did not start')
       }

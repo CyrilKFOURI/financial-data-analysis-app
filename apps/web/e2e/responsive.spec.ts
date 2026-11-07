@@ -96,7 +96,7 @@ for (const size of WIDTHS) {
       await page.keyboard.press('Escape')
 
       await page.getByRole('button', { name: 'Settings' }).click()
-      await expect(page.getByRole('menuitem', { name: /Interface/ })).toBeInViewport()
+      await expect(page.getByRole('menuitem', { name: /Theme/ })).toBeInViewport()
       await expect(page.getByRole('menuitem', { name: 'System & data' })).toBeInViewport()
     })
 

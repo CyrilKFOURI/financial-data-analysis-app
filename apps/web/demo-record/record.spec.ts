@@ -63,6 +63,8 @@ async function record(page: Page, saved: Set<string>) {
 }
 
 async function visit(page: Page, path: string) {
+  // the recorder walks V1's page tabs (archived V1, feature 341): it opens V1 explicitly
+  await page.addInitScript(() => localStorage.setItem('fda.ui-version.341', 'v1'))
   await page.goto(path)
   await page.waitForTimeout(2500)
 }

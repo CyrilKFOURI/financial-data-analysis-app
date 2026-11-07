@@ -82,14 +82,17 @@ export function StatusBar() {
         </a>
       ) : null}
       <span className={`${user || DEMO ? '' : 'ml-auto '}border-l border-rule px-2`}>{theme}</span>
-      <button
-        type="button"
-        className="border-l border-rule px-2 text-accent hover:underline"
-        onClick={() => setVersion(version === 'v1' ? 'v2' : 'v1')}
-        data-testid="ui-version-toggle"
-      >
-        {version === 'v1' ? 'Try the new interface (V2)' : 'Interface V2 · back to V1'}
-      </button>
+      {/* V1 is archived (feature 341): reachable with `?ui=v1` only, with a way back */}
+      {version === 'v1' ? (
+        <button
+          type="button"
+          className="border-l border-rule px-2 text-accent hover:underline"
+          onClick={() => setVersion('v2')}
+          data-testid="ui-version-toggle"
+        >
+          Archived V1 · back to the current interface
+        </button>
+      ) : null}
       <span className="border-l border-rule px-2 tabular-nums">v{APP_VERSION}</span>
     </footer>
   )

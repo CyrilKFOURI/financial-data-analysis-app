@@ -29,7 +29,6 @@ import { SignIn } from '../../shell/SignIn'
 import { StatusBar } from '../../shell/StatusBar'
 import { useShortcuts } from '../../shell/useShortcuts'
 import { APP_VERSION } from '../../version'
-import { useUiVersion } from '../ui-version'
 import { Menu, ParamSelect } from '../ui'
 
 const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
@@ -251,7 +250,6 @@ function ContextMenu() {
 function SettingsMenu() {
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
-  const setVersion = useUiVersion((s) => s.setVersion)
   const row =
     'flex w-full items-center justify-between px-3 py-1.5 text-left text-fg-2 hover:bg-bg-2 hover:text-fg-1'
 
@@ -292,9 +290,6 @@ function SettingsMenu() {
           <div className="my-1 border-t border-rule" />
           <button type="button" role="menuitem" className={row} onClick={toggleTheme}>
             Theme <span className="text-fg-3">{theme === 'graphite' ? 'Dark' : 'Light'}</span>
-          </button>
-          <button type="button" role="menuitem" className={row} onClick={() => setVersion('v1')}>
-            Interface <span className="text-fg-3">Back to V1</span>
           </button>
           <div className="v2-phone-only">
             <div className="my-1 border-t border-rule" />

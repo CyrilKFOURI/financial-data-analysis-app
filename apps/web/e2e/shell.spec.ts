@@ -1,5 +1,10 @@
 import { expect, type Page, test } from '@playwright/test'
 
+// V1 is archived (feature 341): these tests keep it working, so they open it explicitly
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('fda.ui-version.341', 'v1'))
+})
+
 const openPalette = async (page: Page) => {
   // the shortcut can land while the start page is still mounting: press until it opens
   await expect(async () => {
