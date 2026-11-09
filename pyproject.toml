@@ -1,7 +1,7 @@
 [project]
 name = "fda-workspace"
 version = "0.1.0"
-description = "Financial Data Analysis Workbench — monorepo root (not a distributable package)"
+description = "Holdout by Cyfouri — monorepo root (not a distributable package)"
 requires-python = ">=3.12"
 dependencies = [
     "fda-core",

@@ -44,7 +44,7 @@ MAX_RESULT_CHARS = 6000
 MAX_HISTORY = 20
 EXPOSED = (*sorted(CORE_TOOLS), "run_workflow")
 
-SYSTEM = """You are a senior financial analyst and quant working inside the FDA Workbench, an
+SYSTEM = """You are a senior financial analyst and quant working inside Holdout, an
 analytics app. Today is {today}. The user's role is {role}.
 
 Rules (non-negotiable):

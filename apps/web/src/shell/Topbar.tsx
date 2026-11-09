@@ -18,7 +18,7 @@ export function Topbar() {
           title="Cyfouri"
           className="cyfouri-signature h-5 w-auto opacity-70"
         />
-        FDA
+        Holdout
       </div>
       <button
         type="button"

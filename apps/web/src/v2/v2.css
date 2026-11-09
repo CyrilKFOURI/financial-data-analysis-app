@@ -167,10 +167,6 @@
   width: auto;
   color: var(--fg-1);
 }
-.v2-mark .word .fda {
-  font-weight: 400;
-  color: var(--fg-2);
-}
 .v2-mark-glyph {
   display: grid;
   place-items: center;

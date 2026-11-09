@@ -27,7 +27,7 @@ export function SignIn() {
           login.mutate()
         }}
       >
-        <h1 className="micro-label">FDA Workbench · sign in</h1>
+        <h1 className="micro-label">Holdout · sign in</h1>
         <label className="flex flex-col gap-1">
           <span className="text-fg-2">E-mail</span>
           <input

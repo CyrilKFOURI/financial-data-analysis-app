@@ -4,7 +4,7 @@ import httpx2 as httpx
 
 from fda_data.providers.base import ProviderError, RateLimitedError, SymbolNotFoundError
 
-USER_AGENT = "fda-workbench/0.1 (personal research tool)"
+USER_AGENT = "holdout/0.1 (personal research tool)"
 TIMEOUT_S = 20.0
 
 

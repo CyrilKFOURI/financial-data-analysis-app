@@ -126,14 +126,12 @@ function TopBar() {
 
   return (
     <header className="v2-top relative" role="banner">
-      <Link to="/" className="v2-mark" aria-label="Cyfouri · FDA Workbench, home">
+      <Link to="/" className="v2-mark" aria-label="Cyfouri · Holdout, home">
         {/* two marks: the Cyfouri signature (inverted on the dark theme), then the app's own */}
         <img src={cyfouriLogo} alt="" className="cyfouri-signature v2-brand" />
         <span className="v2-mark-rule" aria-hidden />
         <AppMark className="v2-appmark" />
-        <span className="word">
-          <span className="fda">FDA</span> Workbench
-        </span>
+        <span className="word">Holdout</span>
       </Link>
       <nav className="v2-nav" aria-label="Workspaces">
         {WORKSPACES.map((ws) => (
@@ -306,7 +304,7 @@ function SettingsMenu() {
             <p className="m-0 px-3 py-1.5 text-[12px] text-fg-3">
               {DEMO
                 ? `Online demo · engine in your browser · data as of ${DEMO_AS_OF || 'build'}`
-                : 'Workbench'}{' '}
+                : 'Holdout'}{' '}
               · v{APP_VERSION}
             </p>
           </div>

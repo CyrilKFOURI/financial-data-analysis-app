@@ -1,4 +1,4 @@
-/** The FDA Workbench symbol (owner's logo, 2026-11-09), redrawn as a vector: a price path rising in
+/** The Holdout symbol (owner's logo, 2026-11-09), redrawn as a vector: a price path rising in
  *  steps, its echo, and the last leg in the accent. Strokes follow the text colour of the theme. */
 export function AppMark({ className }: { className?: string }) {
   return (

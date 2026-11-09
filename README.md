@@ -1,4 +1,8 @@
-# Financial Data Analysis Workbench
+# Holdout
+
+*by Cyfouri.* In quantitative finance the **holdout** is the data a model never saw while it was
+built. It is where a result has to hold before anyone trusts it, and it is the rule of this app:
+measure, validate out of sample, then conclude. Live demo: https://holdout.vercel.app
 
 An institutional-grade ("Zero-Slop") analysis workbench for every kind of listed asset:
 stocks, ETFs, funds, indices, crypto, FX, futures, and rates. One analytics engine (≈ 100
@@ -78,7 +82,7 @@ Every analysis, plus the data, navigation and paper-trading actions, is exposed 
 ```json
 {
   "mcpServers": {
-    "fda-workbench": {
+    "holdout": {
       "command": "uv",
       "args": ["run", "--directory", "C:/path/to/4_Financial_Data_Analysis_App",
                "python", "-m", "fda_api.mcp_stdio"],
@@ -91,7 +95,7 @@ Every analysis, plus the data, navigation and paper-trading actions, is exposed 
    For Claude Code, run this instead:
 
    ```bash
-   claude mcp add fda-workbench -e FDA_MCP_TOKEN=<token> -- uv run --directory <repo> python -m fda_api.mcp_stdio
+   claude mcp add holdout -e FDA_MCP_TOKEN=<token> -- uv run --directory <repo> python -m fda_api.mcp_stdio
    ```
 
    HTTP clients can also post JSON-RPC to `http://127.0.0.1:8000/mcp` with `Authorization: Bearer <token>`.

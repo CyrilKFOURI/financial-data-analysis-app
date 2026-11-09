@@ -87,7 +87,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 scope.install()  # every query of a signed-in user is restricted to their rows (M31 §2)
-app = FastAPI(title="Financial Data Analysis Workbench API", version=__version__, lifespan=lifespan)
+app = FastAPI(title="Holdout API", version=__version__, lifespan=lifespan)
 # the last registered middleware runs first: cross-site guard, then authentication
 app.middleware("http")(authenticate)
 app.middleware("http")(require_client_header)

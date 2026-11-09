@@ -45,7 +45,7 @@ export function HomeV2() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <TitleRow
-        title="Workbench"
+        title="Holdout"
         sub="One analytics engine for assets, portfolios and strategies"
         actions={
           <span className="flex items-center gap-1">

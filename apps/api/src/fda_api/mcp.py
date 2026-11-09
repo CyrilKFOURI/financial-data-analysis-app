@@ -23,7 +23,7 @@ router = APIRouter(tags=["mcp"])
 
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 INSTRUCTIONS = (
-    "Financial Data Analysis Workbench tools. Numbers must come from tool results: cite each "
+    "Holdout tools. Numbers must come from tool results: cite each "
     "figure as [r:result_id]. Start with search_tools to find an analysis, explain_analysis for "
     "its parameters, get_data_status / request_ingestion for data. Analyses V1–V3 describe and "
     "measure (no buy/sell verdicts); V4–V5 outputs are labelled model outputs with their "
@@ -86,8 +86,8 @@ async def handle(request: Request, message: dict[str, Any]) -> dict[str, Any] | 
                 "protocolVersion": version,
                 "capabilities": {"tools": {"listChanged": False}},
                 "serverInfo": {
-                    "name": "fda-workbench",
-                    "title": "FDA Workbench",
+                    "name": "holdout",
+                    "title": "Holdout",
                     "version": __version__,
                 },
                 "instructions": INSTRUCTIONS,
