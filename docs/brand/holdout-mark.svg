@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- FDA Workbench symbol (src/v2/shell/AppMark.tsx) on the graphite ground, for browser tabs -->
+  <rect width="64" height="64" rx="2" fill="#0f1012"/>
+  <g transform="translate(4 12.7) scale(0.224)" fill="none" stroke-width="13" stroke-linejoin="miter">
+    <g stroke="#ececee">
+      <path d="M8 163H98L128 107H166L211 30"/>
+      <path d="M72 163L116 81H149"/>
+      <path d="M130 113L162 162L240 33"/>
+    </g>
+    <path d="M211 30L224 8H243" stroke="#6b9bf2"/>
+  </g>
+</svg>

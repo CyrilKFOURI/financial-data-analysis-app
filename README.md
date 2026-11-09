@@ -1,3 +1,5 @@
+<p><img src="docs/brand/holdout-mark.svg" alt="" width="64" height="64"></p>
+
 # Holdout
 
 *by Cyfouri.* In quantitative finance the **holdout** is the data a model never saw while it was
