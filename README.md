@@ -2,7 +2,7 @@
 
 *by Cyfouri.* In quantitative finance the **holdout** is the data a model never saw while it was
 built. It is where a result has to hold before anyone trusts it, and it is the rule of this app:
-measure, validate out of sample, then conclude. Live demo: https://holdout.vercel.app
+measure, validate out of sample, then conclude. Live demo: https://holdout-app.vercel.app
 
 An institutional-grade ("Zero-Slop") analysis workbench for every kind of listed asset:
 stocks, ETFs, funds, indices, crypto, FX, futures, and rates. One analytics engine (≈ 100
