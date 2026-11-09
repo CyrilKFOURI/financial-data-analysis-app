@@ -28,6 +28,7 @@ import {
 import { SignIn } from '../../shell/SignIn'
 import { StatusBar } from '../../shell/StatusBar'
 import { useShortcuts } from '../../shell/useShortcuts'
+import { AppMark } from './AppMark'
 import { APP_VERSION } from '../../version'
 import { Menu, ParamSelect } from '../ui'
 
@@ -126,9 +127,13 @@ function TopBar() {
   return (
     <header className="v2-top relative" role="banner">
       <Link to="/" className="v2-mark" aria-label="Cyfouri · FDA Workbench, home">
-        {/* the Cyfouri signature, as in V1 (dimmed, inverted on the dark theme) */}
+        {/* two marks: the Cyfouri signature (inverted on the dark theme), then the app's own */}
         <img src={cyfouriLogo} alt="" className="cyfouri-signature v2-brand" />
-        <span className="word">Workbench</span>
+        <span className="v2-mark-rule" aria-hidden />
+        <AppMark className="v2-appmark" />
+        <span className="word">
+          <span className="fda">FDA</span> Workbench
+        </span>
       </Link>
       <nav className="v2-nav" aria-label="Workspaces">
         {WORKSPACES.map((ws) => (

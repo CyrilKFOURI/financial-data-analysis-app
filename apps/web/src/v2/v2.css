@@ -152,6 +152,25 @@
   height: 34px;
   width: auto;
 }
+.v2-mark-rule {
+  width: 1px;
+  height: 22px;
+  background: var(--rule-strong);
+}
+.v2-brand,
+.v2-mark-rule,
+.v2-appmark {
+  flex: none;
+}
+.v2-appmark {
+  height: 22px;
+  width: auto;
+  color: var(--fg-1);
+}
+.v2-mark .word .fda {
+  font-weight: 400;
+  color: var(--fg-2);
+}
 .v2-mark-glyph {
   display: grid;
   place-items: center;
@@ -1269,11 +1288,26 @@
   }
 }
 
+/* the two brand marks always fit: the context button shortens first */
+@media (max-width: 899px) {
+  .v2-ctx-btn .rest {
+    display: none;
+  }
+}
+
 /* ---------- below 768: the section column becomes a bar and a drawer ---------- */
 
 @media (max-width: 767px) {
-  .v2-ctx-btn .rest {
+  .v2-nav a {
+    padding: 0 7px;
+  }
+  .v2-settings .long {
     display: none;
+  }
+  .v2-settings .short {
+    display: inline;
+    font-size: 18px;
+    letter-spacing: 1px;
   }
   .v2-body {
     flex-direction: column;
