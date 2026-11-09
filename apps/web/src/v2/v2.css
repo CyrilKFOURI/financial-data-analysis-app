@@ -147,10 +147,10 @@
   color: var(--fg-1);
   white-space: nowrap;
 }
+/* the Cyfouri signature stays readable at every width (owner, 2026-11-09): full ink, as tall as the bar allows */
 .v2-brand {
-  height: 24px;
+  height: 34px;
   width: auto;
-  opacity: 0.8;
 }
 .v2-mark-glyph {
   display: grid;
